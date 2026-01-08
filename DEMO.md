@@ -1,0 +1,116 @@
+# 使用演示
+
+## 当前运行状态
+
+✅ 后端服务: http://localhost:3001
+✅ 前端应用: http://localhost:5173
+
+## 立即体验
+
+1. **打开浏览器访问**: http://localhost:5173
+
+2. **你会看到**:
+   - 左侧: Markdown 编辑器 + 配置面板
+   - 右侧: 实时预览区
+
+3. **尝试以下操作**:
+
+### 基础操作
+- 在编辑器中输入文字,右侧会实时显示效果
+- 点击"简约明亮"、"深色优雅"、"温暖舒适"切换主题
+- 调整字体大小滑块,看预览效果变化
+
+### 生成图片
+1. 编辑好内容
+2. 点击紫色的"🎨 生成图片"按钮
+3. 等待 2-5 秒
+4. 看到生成的图片后,点击"⬇️ 下载图片"
+
+### 社交媒体尺寸
+点击这些按钮快速设置尺寸:
+- 微信朋友圈
+- 微博竖图  
+- Instagram 方图
+- Instagram 竖图
+- 小红书
+
+### 自定义样式
+1. 调整"字体大小"滑块
+2. 点击颜色框修改背景色、文字色、强调色
+3. 调整内边距、行间距、段落间距
+4. 输入作者和时间信息
+
+## 示例内容
+
+复制这段到编辑器试试:
+
+```
+# 2026 新年计划
+
+## 健康生活
+- 每天运动 30 分钟
+- 保证 8 小时睡眠
+- 健康饮食
+
+## 学习成长
+1. 阅读 12 本书
+2. 学习新技能
+3. 每月一次总结
+
+**坚持就是胜利!**
+
+*—— 写于 2026 年初*
+```
+
+## 快捷测试
+
+### 测试后端 API
+
+```bash
+curl http://localhost:3001/api/health
+```
+
+应该返回: `{"status":"ok"}`
+
+### 测试图片生成
+
+```bash
+curl -X POST http://localhost:3001/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "markdown_content": "# Hello World\n\nThis is a **test**.",
+    "config": {
+      "canvas_width": 800,
+      "canvas_height": 600
+    }
+  }'
+```
+
+## 停止服务
+
+在运行服务的终端中按 `Ctrl+C` 停止服务器。
+
+## 重新启动
+
+```bash
+# 方式 1: 使用启动脚本
+./start.sh
+
+# 方式 2: 分别启动
+# 终端 1
+cd backend && npm start
+
+# 终端 2  
+cd frontend && npm run dev
+```
+
+## 下一步
+
+- 📖 阅读 [README.md](README.md) 了解完整功能
+- 🚀 查看 [QUICKSTART.md](QUICKSTART.md) 快速开始
+- 🔧 参考 [DEPLOYMENT.md](DEPLOYMENT.md) 部署到生产环境
+- 📊 阅读 [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) 了解项目细节
+
+---
+
+享受创作的乐趣! 🎨✨

@@ -1,0 +1,25 @@
+{
+  "name": "markdown-to-image-generator",
+  "version": "1.0.0",
+  "description": "将 Markdown 文本转换为精美图片的在线工具",
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/markdown-to-image-generator"
+  },
+  "keywords": [
+    "markdown",
+    "image",
+    "generator",
+    "social-media",
+    "content-creation"
+  ],
+  "scripts": {
+    "start": "./start.sh",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm run dev",
+    "build:frontend": "cd frontend && npm run build"
+  }
+}
