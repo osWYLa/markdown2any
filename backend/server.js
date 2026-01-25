@@ -187,9 +187,7 @@ app.post('/api/generate', async (req, res) => {
         : ['--no-sandbox', '--disable-setuid-sandbox'],
       defaultViewport: chromium.defaultViewport,
       executablePath: isProd 
-        ? await chromium.executablePath({
-            cacheDir: '/tmp/chromium',
-          })
+        ? await chromium.executablePath()
         : (process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'),
       headless: chromium.headless,
     });
