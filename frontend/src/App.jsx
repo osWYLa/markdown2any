@@ -34,6 +34,56 @@ const THEMES = {
       accent_color: '#D2691E',
       font_family: 'PingFang SC, -apple-system, sans-serif',
     }
+  },
+  forest: {
+    id: 'forest',
+    name: '清新森系',
+    config: {
+      background_color: '#F0F9F0',
+      text_color: '#2D3A2D',
+      accent_color: '#4CAF50',
+      font_family: 'PingFang SC, -apple-system, sans-serif',
+    }
+  },
+  ocean: {
+    id: 'ocean',
+    name: '深邃海洋',
+    config: {
+      background_color: '#001F3F',
+      text_color: '#F0F8FF',
+      accent_color: '#7FDBFF',
+      font_family: 'PingFang SC, -apple-system, sans-serif',
+    }
+  },
+  vintage: {
+    id: 'vintage',
+    name: '复古书卷',
+    config: {
+      background_color: '#F4ECD8',
+      text_color: '#4A3728',
+      accent_color: '#8B4513',
+      font_family: 'PingFang SC, -apple-system, sans-serif',
+    }
+  },
+  midnight: {
+    id: 'midnight',
+    name: '深夜静谧',
+    config: {
+      background_color: '#121212',
+      text_color: '#B0B0B0',
+      accent_color: '#BB86FC',
+      font_family: 'PingFang SC, -apple-system, sans-serif',
+    }
+  },
+  sakura: {
+    id: 'sakura',
+    name: '浪漫樱花',
+    config: {
+      background_color: '#FFF0F5',
+      text_color: '#4A4A4A',
+      accent_color: '#FF69B4',
+      font_family: 'PingFang SC, -apple-system, sans-serif',
+    }
   }
 };
 
@@ -52,6 +102,10 @@ function App() {
     canvas_width: 1080,
     canvas_height: 1920,
     background_color: '#FFFFFF',
+    is_gradient: false,
+    gradient_start: '#667eea',
+    gradient_end: '#764ba2',
+    gradient_angle: 135,
     text_color: '#333333',
     accent_color: '#007AFF',
     font_family: 'PingFang SC, -apple-system, sans-serif',
@@ -112,6 +166,7 @@ function App() {
       setSelectedTheme(themeId);
       setConfig(prev => ({
         ...prev,
+        is_gradient: false, // 默认重置渐变，除非主题中定义了渐变
         ...theme.config
       }));
     }
@@ -183,6 +238,10 @@ function App() {
       canvas_width: 1080,
       canvas_height: 1920,
       background_color: '#FFFFFF',
+      is_gradient: false,
+      gradient_start: '#667eea',
+      gradient_end: '#764ba2',
+      gradient_angle: 135,
       text_color: '#333333',
       accent_color: '#007AFF',
       font_family: 'PingFang SC, -apple-system, sans-serif',
@@ -220,7 +279,9 @@ function App() {
                     className={`theme-btn ${selectedTheme === theme.id ? 'active' : ''}`}
                     onClick={() => applyTheme(theme.id)}
                     style={{
-                      backgroundColor: theme.config.background_color,
+                      background: theme.config.is_gradient 
+                        ? `linear-gradient(${theme.config.gradient_angle}deg, ${theme.config.gradient_start}, ${theme.config.gradient_end})`
+                        : theme.config.background_color,
                       color: theme.config.text_color,
                       borderColor: theme.config.accent_color
                     }}
@@ -277,19 +338,81 @@ function App() {
 
             {/* 颜色设置 */}
             <div className="config-group">
-              <label>背景颜色</label>
-              <input
-                type="color"
-                value={config.background_color}
-                onChange={(e) => setConfig({...config, background_color: e.target.value})}
-              />
-              <input
-                type="text"
-                value={config.background_color}
-                onChange={(e) => setConfig({...config, background_color: e.target.value})}
-                className="color-input"
-              />
+              <div className="checkbox-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                <input
+                  type="checkbox"
+                  id="is_gradient"
+                  checked={config.is_gradient}
+                  onChange={(e) => setConfig({...config, is_gradient: e.target.checked})}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                />
+                <label htmlFor="is_gradient" style={{ marginBottom: 0, cursor: 'pointer', userSelect: 'none' }}>使用渐变背景</label>
+              </div>
             </div>
+
+            {!config.is_gradient ? (
+              <div className="config-group">
+                <label>背景颜色</label>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <input
+                    type="color"
+                    value={config.background_color}
+                    onChange={(e) => setConfig({...config, background_color: e.target.value})}
+                  />
+                  <input
+                    type="text"
+                    value={config.background_color}
+                    onChange={(e) => setConfig({...config, background_color: e.target.value})}
+                    className="color-input"
+                  />
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="config-group">
+                  <label>渐变起始颜色</label>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <input
+                      type="color"
+                      value={config.gradient_start}
+                      onChange={(e) => setConfig({...config, gradient_start: e.target.value})}
+                    />
+                    <input
+                      type="text"
+                      value={config.gradient_start}
+                      onChange={(e) => setConfig({...config, gradient_start: e.target.value})}
+                      className="color-input"
+                    />
+                  </div>
+                </div>
+                <div className="config-group">
+                  <label>渐变结束颜色</label>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <input
+                      type="color"
+                      value={config.gradient_end}
+                      onChange={(e) => setConfig({...config, gradient_end: e.target.value})}
+                    />
+                    <input
+                      type="text"
+                      value={config.gradient_end}
+                      onChange={(e) => setConfig({...config, gradient_end: e.target.value})}
+                      className="color-input"
+                    />
+                  </div>
+                </div>
+                <div className="config-group">
+                  <label>渐变角度 ({config.gradient_angle}°)</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="360"
+                    value={config.gradient_angle}
+                    onChange={(e) => setConfig({...config, gradient_angle: parseInt(e.target.value)})}
+                  />
+                </div>
+              </>
+            )}
 
             <div className="config-group">
               <label>文字颜色</label>
@@ -444,7 +567,9 @@ function App() {
                 ref={previewRef}
                 className="preview-container"
                 style={{
-                  backgroundColor: config.background_color,
+                  background: config.is_gradient 
+                    ? `linear-gradient(${config.gradient_angle}deg, ${config.gradient_start}, ${config.gradient_end})`
+                    : config.background_color,
                   color: config.text_color,
                   padding: `${config.padding}px`,
                   fontSize: `${config.font_size}px`,
