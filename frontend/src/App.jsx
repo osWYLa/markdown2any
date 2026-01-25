@@ -133,7 +133,9 @@ function App() {
     watermark_gap: 120
   });
   const [loading, setLoading] = useState(false);
+  const [copying, setCopying] = useState(false);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
   const [selectedTheme, setSelectedTheme] = useState('light');
   const [leftWidth, setLeftWidth] = useState(500);
   const [middleWidth, setMiddleWidth] = useState(1000);
@@ -196,40 +198,50 @@ function App() {
     }));
   };
 
-  // 下载图片
-  const downloadImage = async () => {
-    setLoading(true);
-    setError(null);
-    
+  // 生成 Canvas 图片（复用逻辑）
+  const generateCanvas = async () => {
     // 验证输入
     if (!markdownContent.trim()) {
       setError(t('errorEmptyContent'));
-      setLoading(false);
-      return;
+      return null;
     }
     
     if (markdownContent.length > 10000) {
       setError(t('errorContentTooLong'));
-      setLoading(false);
-      return;
+      return null;
     }
     
-    try {
-      if (!previewRef.current) {
-        throw new Error(t('errorPreviewNotReady'));
-      }
+    if (!previewRef.current) {
+      throw new Error(t('errorPreviewNotReady'));
+    }
 
-      // 使用 html2canvas 生成图片
-      const canvas = await html2canvas(previewRef.current, {
-        scale: 2, // 2倍缩放，提高清晰度
-        backgroundColor: null,
-        width: config.canvas_width,
-        height: config.canvas_height,
-        windowWidth: config.canvas_width,
-        windowHeight: config.canvas_height,
-        logging: false,
-        useCORS: true, // 支持跨域图片
-      });
+    // 使用 html2canvas 生成图片
+    const canvas = await html2canvas(previewRef.current, {
+      scale: 2, // 2倍缩放，提高清晰度
+      backgroundColor: null,
+      width: config.canvas_width,
+      height: config.canvas_height,
+      windowWidth: config.canvas_width,
+      windowHeight: config.canvas_height,
+      logging: false,
+      useCORS: true, // 支持跨域图片
+    });
+
+    return canvas;
+  };
+
+  // 下载图片
+  const downloadImage = async () => {
+    setLoading(true);
+    setError(null);
+    setSuccessMessage(null);
+    
+    try {
+      const canvas = await generateCanvas();
+      if (!canvas) {
+        setLoading(false);
+        return;
+      }
 
       // 转换为 base64 并下载
       const imageData = canvas.toDataURL('image/png', 1.0);
@@ -244,6 +256,46 @@ function App() {
       console.error('Error generating image:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 复制图片到剪贴板
+  const copyImageToClipboard = async () => {
+    setCopying(true);
+    setError(null);
+    setSuccessMessage(null);
+    
+    try {
+      const canvas = await generateCanvas();
+      if (!canvas) {
+        setCopying(false);
+        return;
+      }
+
+      // 转换 canvas 为 Blob
+      canvas.toBlob(async (blob) => {
+        try {
+          // 使用 Clipboard API 复制图片
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              'image/png': blob
+            })
+          ]);
+          
+          setSuccessMessage(t('copySuccess'));
+          // 3秒后清除成功提示
+          setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (err) {
+          console.error('Error copying to clipboard:', err);
+          setError(t('copyFailed'));
+        } finally {
+          setCopying(false);
+        }
+      }, 'image/png');
+    } catch (err) {
+      setError(err.message || t('copyFailed'));
+      console.error('Error generating image for copy:', err);
+      setCopying(false);
     }
   };
 
@@ -688,9 +740,16 @@ function App() {
               <button 
                 className="btn btn-success" 
                 onClick={downloadImage} 
-                disabled={loading}
+                disabled={loading || copying}
               >
                 {loading ? t('generating') : t('downloadImage')}
+              </button>
+              <button 
+                className="btn btn-primary" 
+                onClick={copyImageToClipboard} 
+                disabled={loading || copying}
+              >
+                {copying ? t('copying') : t('copyImage')}
               </button>
             </div>
             <div className="preview-scroll-container">
@@ -821,6 +880,21 @@ function App() {
           {error && (
             <div className="error-message">
               ❌ {error}
+            </div>
+          )}
+          
+          {/* 成功提示 */}
+          {successMessage && (
+            <div className="success-message" style={{
+              padding: '12px 20px',
+              marginTop: '10px',
+              backgroundColor: '#d4edda',
+              color: '#155724',
+              borderRadius: '4px',
+              border: '1px solid #c3e6cb',
+              fontSize: '14px'
+            }}>
+              {successMessage}
             </div>
           )}
         </div>

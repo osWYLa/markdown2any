@@ -351,7 +351,7 @@ body {
 .btn-success {
   background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
   color: white;
-  width: 100%;
+  flex: 1;
 }
 
 .btn-success:hover {
@@ -385,6 +385,9 @@ body {
 
 .preview-actions {
   padding-bottom: 1rem;
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
 .result-section {
