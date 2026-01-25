@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import html2canvas from 'html2canvas';
@@ -7,10 +8,10 @@ import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import './App.css';
 
 // 预设主题
-const THEMES = {
+const getThemes = (t) => ({
   light: {
     id: 'light',
-    name: '简约明亮',
+    name: t('themes.light'),
     config: {
       background_color: '#FFFFFF',
       text_color: '#333333',
@@ -20,7 +21,7 @@ const THEMES = {
   },
   dark: {
     id: 'dark',
-    name: '深色优雅',
+    name: t('themes.dark'),
     config: {
       background_color: '#1a1a1a',
       text_color: '#E5E5E5',
@@ -30,7 +31,7 @@ const THEMES = {
   },
   warm: {
     id: 'warm',
-    name: '温暖舒适',
+    name: t('themes.warm'),
     config: {
       background_color: '#FFF8F0',
       text_color: '#5D4E37',
@@ -40,7 +41,7 @@ const THEMES = {
   },
   forest: {
     id: 'forest',
-    name: '清新森系',
+    name: t('themes.forest'),
     config: {
       background_color: '#F0F9F0',
       text_color: '#2D3A2D',
@@ -50,7 +51,7 @@ const THEMES = {
   },
   ocean: {
     id: 'ocean',
-    name: '深邃海洋',
+    name: t('themes.ocean'),
     config: {
       background_color: '#001F3F',
       text_color: '#F0F8FF',
@@ -60,7 +61,7 @@ const THEMES = {
   },
   vintage: {
     id: 'vintage',
-    name: '复古书卷',
+    name: t('themes.vintage'),
     config: {
       background_color: '#F4ECD8',
       text_color: '#4A3728',
@@ -70,7 +71,7 @@ const THEMES = {
   },
   midnight: {
     id: 'midnight',
-    name: '深夜静谧',
+    name: t('themes.midnight'),
     config: {
       background_color: '#121212',
       text_color: '#B0B0B0',
@@ -80,7 +81,7 @@ const THEMES = {
   },
   sakura: {
     id: 'sakura',
-    name: '浪漫樱花',
+    name: t('themes.sakura'),
     config: {
       background_color: '#FFF0F5',
       text_color: '#4A4A4A',
@@ -88,19 +89,23 @@ const THEMES = {
       font_family: 'PingFang SC, -apple-system, sans-serif',
     }
   }
-};
+});
 
 // 社交媒体预设尺寸
-const PRESET_SIZES = [
-  { name: '微信朋友圈', width: 1080, height: 1260 },
-  { name: '微博竖图', width: 1080, height: 1920 },
-  { name: 'Instagram 方图', width: 1080, height: 1080 },
-  { name: 'Instagram 竖图', width: 1080, height: 1350 },
-  { name: '小红书', width: 1080, height: 1440 },
+const getPresetSizes = (t) => [
+  { name: t('presetSizes.wechat'), width: 1080, height: 1260 },
+  { name: t('presetSizes.weibo'), width: 1080, height: 1920 },
+  { name: t('presetSizes.instagram_square'), width: 1080, height: 1080 },
+  { name: t('presetSizes.instagram_portrait'), width: 1080, height: 1350 },
+  { name: t('presetSizes.xiaohongshu'), width: 1080, height: 1440 },
 ];
 
 function App() {
-  const [markdownContent, setMarkdownContent] = useState('# 欢迎使用 Markdown 转图片生成器\n\n这是一个**简单**的示例。\n\n## 支持的功能\n\n- 无序列表项 1\n- 无序列表项 2\n\n1. 有序列表项 1\n2. 有序列表项 2\n\n这里有*斜体*和**粗体**文本。\n\n### 表格功能\n\n| 功能 | 支持 | 说明 |\n|------|------|------|\n| 标题 | ✅ | H1-H6 |\n| 列表 | ✅ | 有序/无序 |\n| 表格 | ✅ | GFM 语法 |\n| 链接 | ✅ | [文本](链接) |\n| 代码 | ✅ | 语法高亮 |\n\n### 代码示例\n\n```javascript\nfunction greet(name) {\n  console.log(`Hello, ${name}!`);\n  return name;\n}\n\ngreet("World");\n```\n\n[这是一个链接](https://example.com)');
+  const { t, i18n } = useTranslation();
+  const [markdownContent, setMarkdownContent] = useState(t('defaultMarkdown'));
+  const THEMES = getThemes(t);
+  const PRESET_SIZES = getPresetSizes(t);
+
   const [config, setConfig] = useState({
     canvas_width: 1080,
     canvas_height: 1920,
@@ -198,20 +203,20 @@ function App() {
     
     // 验证输入
     if (!markdownContent.trim()) {
-      setError('请输入 Markdown 内容');
+      setError(t('errorEmptyContent'));
       setLoading(false);
       return;
     }
     
     if (markdownContent.length > 10000) {
-      setError('内容过长,请控制在 10000 字符以内');
+      setError(t('errorContentTooLong'));
       setLoading(false);
       return;
     }
     
     try {
       if (!previewRef.current) {
-        throw new Error('预览容器未就绪');
+        throw new Error(t('errorPreviewNotReady'));
       }
 
       // 使用 html2canvas 生成图片
@@ -235,7 +240,7 @@ function App() {
       link.click();
       document.body.removeChild(link);
     } catch (err) {
-      setError(err.message || '生成图片时发生未知错误');
+      setError(err.message || t('errorUnknown'));
       console.error('Error generating image:', err);
     } finally {
       setLoading(false);
@@ -276,19 +281,37 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>📝 Markdown 转图片生成器</h1>
-        <p>将 Markdown 文本转换为精美图片,适合社交媒体分享</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          <div>
+            <h1>{t('title')}</h1>
+            <p>{t('subtitle')}</p>
+          </div>
+          <div className="language-switcher">
+            <button 
+              className={`lang-btn ${i18n.language === 'zh' ? 'active' : ''}`}
+              onClick={() => i18n.changeLanguage('zh')}
+            >
+              中文
+            </button>
+            <button 
+              className={`lang-btn ${i18n.language === 'en' ? 'active' : ''}`}
+              onClick={() => i18n.changeLanguage('en')}
+            >
+              English
+            </button>
+          </div>
+        </div>
       </header>
 
       <div className="app-content">
         {/* 左侧：配置面板 */}
         <div className="panel config-panel" style={{ width: `${leftWidth}px`, flex: 'none' }}>
           <div className="config-section">
-            <h2>配置面板</h2>
+            <h2>{t('configPanel')}</h2>
 
             {/* 主题选择 */}
             <div className="config-group">
-              <label>选择主题</label>
+              <label>{t('selectTheme')}</label>
               <div className="theme-selector">
                 {Object.values(THEMES).map(theme => (
                   <button
@@ -311,7 +334,7 @@ function App() {
 
             {/* 画布尺寸 */}
             <div className="config-group">
-              <label>画布尺寸</label>
+              <label>{t('canvasSize')}</label>
               <div className="preset-sizes">
                 {PRESET_SIZES.map((preset, index) => (
                   <button
@@ -328,21 +351,21 @@ function App() {
                   type="number"
                   value={config.canvas_width}
                   onChange={(e) => setConfig({...config, canvas_width: parseInt(e.target.value)})}
-                  placeholder="宽度"
+                  placeholder={t('widthPlaceholder')}
                 />
                 <span>×</span>
                 <input
                   type="number"
                   value={config.canvas_height}
                   onChange={(e) => setConfig({...config, canvas_height: parseInt(e.target.value)})}
-                  placeholder="高度"
+                  placeholder={t('heightPlaceholder')}
                 />
               </div>
             </div>
 
             {/* 字体设置 */}
             <div className="config-group">
-              <label>字体大小</label>
+              <label>{t('fontSize')}</label>
               <input
                 type="range"
                 min="12"
@@ -363,13 +386,13 @@ function App() {
                   onChange={(e) => setConfig({...config, is_gradient: e.target.checked})}
                   style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                 />
-                <label htmlFor="is_gradient" style={{ marginBottom: 0, cursor: 'pointer', userSelect: 'none' }}>使用渐变背景</label>
+                <label htmlFor="is_gradient" style={{ marginBottom: 0, cursor: 'pointer', userSelect: 'none' }}>{t('gradientBackground')}</label>
               </div>
             </div>
 
             {!config.is_gradient ? (
               <div className="config-group">
-                <label>背景颜色</label>
+                <label>{t('backgroundColor')}</label>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <input
                     type="color"
@@ -387,7 +410,7 @@ function App() {
             ) : (
               <>
                 <div className="config-group">
-                  <label>渐变起始颜色</label>
+                  <label>{t('gradientStartColor')}</label>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <input
                       type="color"
@@ -403,7 +426,7 @@ function App() {
                   </div>
                 </div>
                 <div className="config-group">
-                  <label>渐变结束颜色</label>
+                  <label>{t('gradientEndColor')}</label>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <input
                       type="color"
@@ -419,7 +442,7 @@ function App() {
                   </div>
                 </div>
                 <div className="config-group">
-                  <label>渐变角度 ({config.gradient_angle}°)</label>
+                  <label>{t('gradientAngle', { angle: config.gradient_angle })}</label>
                   <input
                     type="range"
                     min="0"
@@ -432,7 +455,7 @@ function App() {
             )}
 
             <div className="config-group">
-              <label>文字颜色</label>
+              <label>{t('textColor')}</label>
               <input
                 type="color"
                 value={config.text_color}
@@ -447,7 +470,7 @@ function App() {
             </div>
 
             <div className="config-group">
-              <label>强调色</label>
+              <label>{t('accentColor')}</label>
               <input
                 type="color"
                 value={config.accent_color}
@@ -463,7 +486,7 @@ function App() {
 
             {/* 间距设置 */}
             <div className="config-group">
-              <label>内边距</label>
+              <label>{t('padding')}</label>
               <input
                 type="range"
                 min="20"
@@ -475,7 +498,7 @@ function App() {
             </div>
 
             <div className="config-group">
-              <label>行间距</label>
+              <label>{t('lineHeight')}</label>
               <input
                 type="range"
                 min="1.2"
@@ -488,7 +511,7 @@ function App() {
             </div>
 
             <div className="config-group">
-              <label>段落间距</label>
+              <label>{t('paragraphSpacing')}</label>
               <input
                 type="range"
                 min="10"
@@ -501,33 +524,33 @@ function App() {
 
             {/* 元信息 */}
             <div className="config-group">
-              <label>作者</label>
+              <label>{t('author')}</label>
               <input
                 type="text"
                 value={config.author}
                 onChange={(e) => setConfig({...config, author: e.target.value})}
-                placeholder="输入作者名称"
+                placeholder={t('authorPlaceholder')}
               />
             </div>
 
             <div className="config-group">
-              <label>时间</label>
+              <label>{t('timestamp')}</label>
               <input
                 type="text"
                 value={config.timestamp}
                 onChange={(e) => setConfig({...config, timestamp: e.target.value})}
-                placeholder="输入时间信息"
+                placeholder={t('timestampPlaceholder')}
               />
             </div>
 
             <div className="config-group">
-              <label>元信息位置</label>
+              <label>{t('metaPosition')}</label>
               <select
                 value={config.meta_position}
                 onChange={(e) => setConfig({...config, meta_position: e.target.value})}
               >
-                <option value="top">顶部</option>
-                <option value="bottom">底部</option>
+                <option value="top">{t('metaTop')}</option>
+                <option value="bottom">{t('metaBottom')}</option>
               </select>
             </div>
 
@@ -542,24 +565,24 @@ function App() {
                   onChange={(e) => setConfig({...config, watermark_enable: e.target.checked})}
                   style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                 />
-                <label htmlFor="watermark_enable" style={{ marginBottom: 0, cursor: 'pointer', userSelect: 'none' }}>启用文字水印</label>
+                <label htmlFor="watermark_enable" style={{ marginBottom: 0, cursor: 'pointer', userSelect: 'none' }}>{t('enableWatermark')}</label>
               </div>
             </div>
 
             {config.watermark_enable && (
               <>
                 <div className="config-group">
-                  <label>水印内容</label>
+                  <label>{t('watermarkContent')}</label>
                   <input
                     type="text"
                     value={config.watermark_text}
                     onChange={(e) => setConfig({...config, watermark_text: e.target.value})}
-                    placeholder="输入水印文字"
+                    placeholder={t('watermarkPlaceholder')}
                   />
                 </div>
 
                 <div className="config-group">
-                  <label>水印颜色</label>
+                  <label>{t('watermarkColor')}</label>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <input
                       type="color"
@@ -576,7 +599,7 @@ function App() {
                 </div>
 
                 <div className="config-group">
-                  <label>透明度 ({Math.round(config.watermark_opacity * 100)}%)</label>
+                  <label>{t('watermarkOpacity', { opacity: Math.round(config.watermark_opacity * 100) })}</label>
                   <input
                     type="range"
                     min="0.05"
@@ -588,7 +611,7 @@ function App() {
                 </div>
 
                 <div className="config-group">
-                  <label>字体大小 ({config.watermark_size}px)</label>
+                  <label>{t('watermarkSize', { size: config.watermark_size })}</label>
                   <input
                     type="range"
                     min="10"
@@ -599,7 +622,7 @@ function App() {
                 </div>
 
                 <div className="config-group">
-                  <label>旋转角度 ({config.watermark_angle}°)</label>
+                  <label>{t('watermarkAngle', { angle: config.watermark_angle })}</label>
                   <input
                     type="range"
                     min="-180"
@@ -610,7 +633,7 @@ function App() {
                 </div>
 
                 <div className="config-group">
-                  <label>水印间距 ({config.watermark_gap}px)</label>
+                  <label>{t('watermarkGap', { gap: config.watermark_gap })}</label>
                   <input
                     type="range"
                     min="50"
@@ -625,7 +648,7 @@ function App() {
             {/* 操作按钮 */}
             <div className="action-buttons">
               <button className="btn btn-secondary" onClick={resetConfig}>
-                🔄 重置配置
+                {t('resetConfig')}
               </button>
             </div>
           </div>
@@ -640,14 +663,14 @@ function App() {
         <div className="panel editor-panel" style={{ width: `${middleWidth}px`, flex: 'none' }}>
           <div className="editor-section">
             <div className="section-header">
-              <h2>Markdown 编辑器</h2>
-              <span className="char-count">{markdownContent.length} 字符</span>
+              <h2>{t('editor')}</h2>
+              <span className="char-count">{t('charCount', { count: markdownContent.length })}</span>
             </div>
             <textarea
               className="markdown-editor"
               value={markdownContent}
               onChange={(e) => setMarkdownContent(e.target.value)}
-              placeholder="在此输入 Markdown 内容..."
+              placeholder={t('editorPlaceholder')}
             />
           </div>
         </div>
@@ -660,14 +683,14 @@ function App() {
         {/* 右侧：预览和下载 */}
         <div className="panel preview-panel">
           <div className="preview-section">
-            <h2>预览</h2>
+            <h2>{t('preview')}</h2>
             <div className="preview-actions">
               <button 
                 className="btn btn-success" 
                 onClick={downloadImage} 
                 disabled={loading}
               >
-                {loading ? '生成中...' : '⬇️ 下载图片'}
+                {loading ? t('generating') : t('downloadImage')}
               </button>
             </div>
             <div className="preview-scroll-container">
