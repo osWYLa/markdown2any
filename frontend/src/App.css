@@ -285,11 +285,16 @@ h2 {
   box-shadow: 0 6px 20px rgba(17, 153, 142, 0.4);
 }
 
+.preview-section {
+  overflow-x: auto;
+}
+
 .preview-container {
   border: 2px solid #e0e0e0;
   border-radius: 8px;
-  min-height: 400px;
-  overflow: auto;
+  overflow: visible;
+  margin: 0 auto;
+  display: inline-block;
 }
 
 .preview-container h1,
@@ -298,6 +303,23 @@ h2 {
 .preview-container h4 {
   margin-bottom: 1rem;
   font-weight: 600;
+  line-height: 1.3;
+}
+
+.preview-container h1 {
+  font-size: 2em;
+}
+
+.preview-container h2 {
+  font-size: 1.75em;
+}
+
+.preview-container h3 {
+  font-size: 1.5em;
+}
+
+.preview-container h4 {
+  font-size: 1.25em;
 }
 
 .preview-container p {
@@ -307,7 +329,7 @@ h2 {
 .preview-container ul,
 .preview-container ol {
   margin-bottom: 1rem;
-  padding-left: 2rem;
+  padding-left: 1.5em;
 }
 
 .preview-container li {
@@ -319,8 +341,15 @@ h2 {
   border-bottom: 1px solid;
 }
 
+.preview-container strong {
+  font-weight: 600;
+}
+
+.preview-container em {
+  font-style: italic;
+}
+
 .meta-info {
-  margin-top: 2rem;
   text-align: center;
   opacity: 0.7;
 }

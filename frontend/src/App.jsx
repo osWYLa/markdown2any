@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
+import html2canvas from 'html2canvas';
 import './App.css';
 
 // 预设主题
@@ -66,6 +67,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedTheme, setSelectedTheme] = useState('light');
+  const previewRef = useRef(null);
 
   // 应用主题
   const applyTheme = (themeId) => {
@@ -107,35 +109,27 @@ function App() {
     }
     
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${apiUrl}/api/generate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          markdown_content: markdownContent,
-          config: config
-        })
+      if (!previewRef.current) {
+        throw new Error('预览容器未就绪');
+      }
+
+      // 使用 html2canvas 生成图片
+      const canvas = await html2canvas(previewRef.current, {
+        scale: 2, // 2倍缩放，提高清晰度
+        backgroundColor: config.background_color,
+        width: config.canvas_width,
+        height: config.canvas_height,
+        windowWidth: config.canvas_width,
+        windowHeight: config.canvas_height,
+        logging: false,
+        useCORS: true, // 支持跨域图片
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || '生成图片失败,请稍后重试');
-      }
-
-      const data = await response.json();
-      if (data.success && data.image) {
-        setGeneratedImage(data.image);
-      } else {
-        throw new Error('图片生成失败');
-      }
+      // 转换为 base64
+      const imageData = canvas.toDataURL('image/png', 1.0);
+      setGeneratedImage(imageData);
     } catch (err) {
-      if (err.name === 'TypeError' && err.message.includes('fetch')) {
-        setError('无法连接到服务器,请确保后端服务正在运行 (http://localhost:3001)');
-      } else {
-        setError(err.message || '生成图片时发生未知错误');
-      }
+      setError(err.message || '生成图片时发生未知错误');
       console.error('Error generating image:', err);
     } finally {
       setLoading(false);
@@ -398,6 +392,7 @@ function App() {
           <div className="preview-section">
             <h2>预览</h2>
             <div 
+              ref={previewRef}
               className="preview-container"
               style={{
                 backgroundColor: config.background_color,
@@ -405,8 +400,19 @@ function App() {
                 padding: `${config.padding}px`,
                 fontSize: `${config.font_size}px`,
                 lineHeight: config.line_height,
+                width: `${config.canvas_width}px`,
+                minHeight: `${config.canvas_height}px`,
+                boxSizing: 'border-box',
               }}
             >
+              {(config.author || config.timestamp) && config.meta_position === 'top' && (
+                <div className="meta-info" style={{fontSize: `${config.font_size * 0.875}px`, marginBottom: `${config.padding}px`}}>
+                  {config.author && <span>{config.author}</span>}
+                  {config.author && config.timestamp && <span> · </span>}
+                  {config.timestamp && <span>{config.timestamp}</span>}
+                </div>
+              )}
+
               <ReactMarkdown
                 components={{
                   h1: ({node, ...props}) => <h1 style={{color: config.accent_color}} {...props} />,
@@ -420,8 +426,8 @@ function App() {
                 {markdownContent}
               </ReactMarkdown>
               
-              {(config.author || config.timestamp) && (
-                <div className="meta-info" style={{fontSize: `${config.font_size * 0.875}px`}}>
+              {(config.author || config.timestamp) && config.meta_position === 'bottom' && (
+                <div className="meta-info" style={{fontSize: `${config.font_size * 0.875}px`, marginTop: `${config.padding}px`}}>
                   {config.author && <span>{config.author}</span>}
                   {config.author && config.timestamp && <span> · </span>}
                   {config.timestamp && <span>{config.timestamp}</span>}

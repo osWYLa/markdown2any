@@ -16,10 +16,9 @@
     "content-creation"
   ],
   "scripts": {
-    "start": "./start.sh",
-    "install:all": "cd backend && npm install && cd ../frontend && npm install",
-    "start:backend": "cd backend && npm start",
-    "start:frontend": "cd frontend && npm run dev",
-    "build:frontend": "cd frontend && npm run build"
+    "start": "cd frontend && npm run dev",
+    "install": "cd frontend && npm install",
+    "build": "cd frontend && npm run build",
+    "preview": "cd frontend && npm run preview"
   }
 }
