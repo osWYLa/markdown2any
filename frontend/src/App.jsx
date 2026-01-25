@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import html2canvas from 'html2canvas';
 import './App.css';
 
@@ -97,7 +98,7 @@ const PRESET_SIZES = [
 ];
 
 function App() {
-  const [markdownContent, setMarkdownContent] = useState('# 欢迎使用 Markdown 转图片生成器\n\n这是一个**简单**的示例。\n\n## 支持的功能\n\n- 无序列表项 1\n- 无序列表项 2\n\n1. 有序列表项 1\n2. 有序列表项 2\n\n这里有*斜体*和**粗体**文本。\n\n[这是一个链接](https://example.com)');
+  const [markdownContent, setMarkdownContent] = useState('# 欢迎使用 Markdown 转图片生成器\n\n这是一个**简单**的示例。\n\n## 支持的功能\n\n- 无序列表项 1\n- 无序列表项 2\n\n1. 有序列表项 1\n2. 有序列表项 2\n\n这里有*斜体*和**粗体**文本。\n\n### 表格功能\n\n| 功能 | 支持 | 说明 |\n|------|------|------|\n| 标题 | ✅ | H1-H6 |\n| 列表 | ✅ | 有序/无序 |\n| 表格 | ✅ | GFM 语法 |\n| 链接 | ✅ | [文本](链接) |\n\n[这是一个链接](https://example.com)');
   const [config, setConfig] = useState({
     canvas_width: 1080,
     canvas_height: 1920,
@@ -588,6 +589,7 @@ function App() {
                 )}
 
                 <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
                   components={{
                     h1: ({...props}) => <h1 style={{color: config.accent_color}} {...props} />,
                     h2: ({...props}) => <h2 style={{color: config.accent_color}} {...props} />,
@@ -595,6 +597,9 @@ function App() {
                     h4: ({...props}) => <h4 style={{color: config.accent_color}} {...props} />,
                     strong: ({...props}) => <strong style={{color: config.accent_color}} {...props} />,
                     a: ({...props}) => <a style={{color: config.accent_color}} {...props} />,
+                    table: ({...props}) => <table style={{borderColor: config.accent_color}} {...props} />,
+                    th: ({...props}) => <th style={{backgroundColor: config.accent_color, color: config.background_color}} {...props} />,
+                    td: ({...props}) => <td style={{borderColor: config.accent_color}} {...props} />,
                   }}
                 >
                   {markdownContent}
