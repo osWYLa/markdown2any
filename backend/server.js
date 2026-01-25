@@ -182,10 +182,16 @@ app.post('/api/generate', async (req, res) => {
     const isProd = process.env.NODE_ENV === 'production' || process.env.VERCEL;
     
     browser = await puppeteer.launch({
-      args: isProd ? [...chromium.args, '--hide-scrollbars', '--disable-web-security'] : ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: isProd 
+        ? chromium.args
+        : ['--no-sandbox', '--disable-setuid-sandbox'],
       defaultViewport: chromium.defaultViewport,
-      executablePath: isProd ? await chromium.executablePath() : (process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'),
-      headless: isProd ? chromium.headless : true,
+      executablePath: isProd 
+        ? await chromium.executablePath({
+            cacheDir: '/tmp/chromium',
+          })
+        : (process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'),
+      headless: chromium.headless,
     });
 
     const page = await browser.newPage();
