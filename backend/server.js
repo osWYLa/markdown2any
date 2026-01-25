@@ -1,7 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const { marked } = require('marked');
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
+const chromium = require('@sparticuz/chromium');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -178,9 +179,13 @@ app.post('/api/generate', async (req, res) => {
     const html = generateHTML(markdown_content, config || {});
 
     // Launch puppeteer
+    const isProd = process.env.NODE_ENV === 'production' || process.env.VERCEL;
+    
     browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: isProd ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'],
+      defaultViewport: chromium.defaultViewport,
+      executablePath: isProd ? await chromium.executablePath() : (process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'),
+      headless: isProd ? chromium.headless : true,
     });
 
     const page = await browser.newPage();
