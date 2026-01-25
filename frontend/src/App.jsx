@@ -130,8 +130,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedTheme, setSelectedTheme] = useState('light');
-  const [leftWidth, setLeftWidth] = useState(350);
-  const [middleWidth, setMiddleWidth] = useState(600);
+  const [leftWidth, setLeftWidth] = useState(500);
+  const [middleWidth, setMiddleWidth] = useState(1000);
   const [isResizingLeft, setIsResizingLeft] = useState(false);
   const [isResizingRight, setIsResizingRight] = useState(false);
   const previewRef = useRef(null);
