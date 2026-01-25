@@ -138,13 +138,58 @@ body {
   flex: 1;
 }
 
+.markdown-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px;
+  background: #f8f9fa;
+  border: 2px solid #e0e0e0;
+  border-bottom: none;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  align-items: center;
+}
+
+.markdown-toolbar button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #444;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.markdown-toolbar button:hover {
+  background: #f0f4ff;
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 20px;
+  background: #ddd;
+  margin: 0 4px;
+}
+
 .markdown-editor {
   flex: 1;
   width: 100%;
   min-height: 500px;
   padding: 1rem;
   border: 2px solid #e0e0e0;
-  border-radius: 8px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 0.875rem;
   line-height: 1.6;

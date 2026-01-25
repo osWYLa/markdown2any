@@ -142,6 +142,120 @@ function App() {
   const [isResizingLeft, setIsResizingLeft] = useState(false);
   const [isResizingRight, setIsResizingRight] = useState(false);
   const previewRef = useRef(null);
+  const editorRef = useRef(null);
+
+  // 工具栏操作函数
+  const handleEditorAction = (type) => {
+    const textarea = editorRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selection = markdownContent.substring(start, end);
+    const before = markdownContent.substring(0, start);
+    const after = markdownContent.substring(end);
+    
+    let newText = '';
+    let selectionOffset = 0;
+    let selectionLength = 0;
+
+    switch (type) {
+      case 'bold':
+        newText = `**${selection || t('toolbar.boldText')}**`;
+        selectionOffset = 2;
+        selectionLength = selection ? selection.length : t('toolbar.boldText').length;
+        break;
+      case 'italic':
+        newText = `*${selection || t('toolbar.italicText')}*`;
+        selectionOffset = 1;
+        selectionLength = selection ? selection.length : t('toolbar.italicText').length;
+        break;
+      case 'underline':
+        newText = `<u>${selection || t('toolbar.underlineText')}</u>`;
+        selectionOffset = 3;
+        selectionLength = selection ? selection.length : t('toolbar.underlineText').length;
+        break;
+      case 'strikethrough':
+        newText = `~~${selection || t('toolbar.strikethroughText')}~~`;
+        selectionOffset = 2;
+        selectionLength = selection ? selection.length : t('toolbar.strikethroughText').length;
+        break;
+      case 'h1':
+        newText = `\n# ${selection || t('toolbar.h1Text')}\n`;
+        selectionOffset = 3;
+        selectionLength = selection ? selection.length : t('toolbar.h1Text').length;
+        break;
+      case 'h2':
+        newText = `\n## ${selection || t('toolbar.h2Text')}\n`;
+        selectionOffset = 4;
+        selectionLength = selection ? selection.length : t('toolbar.h2Text').length;
+        break;
+      case 'h3':
+        newText = `\n### ${selection || t('toolbar.h3Text')}\n`;
+        selectionOffset = 5;
+        selectionLength = selection ? selection.length : t('toolbar.h3Text').length;
+        break;
+      case 'quote':
+        newText = `\n> ${selection || t('toolbar.quoteText')}\n`;
+        selectionOffset = 3;
+        selectionLength = selection ? selection.length : t('toolbar.quoteText').length;
+        break;
+      case 'code':
+        newText = `\`${selection || t('toolbar.codeText')}\``;
+        selectionOffset = 1;
+        selectionLength = selection ? selection.length : t('toolbar.codeText').length;
+        break;
+      case 'codeblock':
+        newText = `
+\`\`\`javascript
+${selection || t('toolbar.codeblockText')}
+\`\`\`
+`;
+        selectionOffset = 15; // length of \n```javascript\n
+        selectionLength = selection ? selection.length : t('toolbar.codeblockText').length;
+        break;
+      case 'link':
+        newText = `[${selection || t('toolbar.linkText')}](https://)`;
+        selectionOffset = 1;
+        selectionLength = selection ? selection.length : t('toolbar.linkText').length;
+        break;
+      case 'image':
+        newText = `![${selection || t('toolbar.imageText')}](https://)`;
+        selectionOffset = 2;
+        selectionLength = selection ? selection.length : t('toolbar.imageText').length;
+        break;
+      case 'ul':
+        newText = `\n- ${selection || t('toolbar.listText')}\n`;
+        selectionOffset = 3;
+        selectionLength = selection ? selection.length : t('toolbar.listText').length;
+        break;
+      case 'ol':
+        newText = `\n1. ${selection || t('toolbar.listText')}\n`;
+        selectionOffset = 4;
+        selectionLength = selection ? selection.length : t('toolbar.listText').length;
+        break;
+      case 'table':
+        newText = `
+| ${t('toolbar.col1')} | ${t('toolbar.col2')} |
+| --- | --- |
+| ${t('toolbar.cell')} | ${t('toolbar.cell')} |
+`;
+        selectionOffset = 3;
+        selectionLength = t('toolbar.col1').length;
+        break;
+      default:
+        return;
+    }
+
+    const newContent = before + newText + after;
+    setMarkdownContent(newContent);
+
+    // 重新聚焦并选中文字
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + selectionOffset, start + selectionOffset + selectionLength);
+    }, 0);
+  };
 
   // 面板调整逻辑
   useEffect(() => {
@@ -718,7 +832,29 @@ function App() {
               <h2>{t('editor')}</h2>
               <span className="char-count">{t('charCount', { count: markdownContent.length })}</span>
             </div>
+            <div className="markdown-toolbar">
+              <button onClick={() => handleEditorAction('h1')} title={t('toolbar.h1')}>H1</button>
+              <button onClick={() => handleEditorAction('h2')} title={t('toolbar.h2')}>H2</button>
+              <button onClick={() => handleEditorAction('h3')} title={t('toolbar.h3')}>H3</button>
+              <div className="toolbar-divider"></div>
+              <button onClick={() => handleEditorAction('bold')} title={t('toolbar.bold')}><strong>B</strong></button>
+              <button onClick={() => handleEditorAction('italic')} title={t('toolbar.italic')}><em>I</em></button>
+              <button onClick={() => handleEditorAction('underline')} title={t('toolbar.underline')} style={{textDecoration: 'underline'}}>U</button>
+              <button onClick={() => handleEditorAction('strikethrough')} title={t('toolbar.strikethrough')} style={{textDecoration: 'line-through'}}>S</button>
+              <div className="toolbar-divider"></div>
+              <button onClick={() => handleEditorAction('quote')} title={t('toolbar.quote')}>“</button>
+              <button onClick={() => handleEditorAction('code')} title={t('toolbar.code')}>{'<>'}</button>
+              <button onClick={() => handleEditorAction('codeblock')} title={t('toolbar.codeblock')}>{'Code'}</button>
+              <div className="toolbar-divider"></div>
+              <button onClick={() => handleEditorAction('link')} title={t('toolbar.link')}>🔗</button>
+              <button onClick={() => handleEditorAction('image')} title={t('toolbar.image')}>🖼️</button>
+              <button onClick={() => handleEditorAction('table')} title={t('toolbar.table')}>📊</button>
+              <div className="toolbar-divider"></div>
+              <button onClick={() => handleEditorAction('ul')} title={t('toolbar.ul')}>•</button>
+              <button onClick={() => handleEditorAction('ol')} title={t('toolbar.ol')}>1.</button>
+            </div>
             <textarea
+              ref={editorRef}
               className="markdown-editor"
               value={markdownContent}
               onChange={(e) => setMarkdownContent(e.target.value)}
