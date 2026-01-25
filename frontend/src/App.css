@@ -132,6 +132,12 @@ body {
   margin-bottom: 1.5rem;
 }
 
+.config-section-divider {
+  height: 1px;
+  background-color: #eee;
+  margin: 1rem 0 1.5rem 0;
+}
+
 .config-group label {
   display: block;
   font-size: 0.875rem;

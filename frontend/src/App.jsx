@@ -116,7 +116,14 @@ function App() {
     paragraph_spacing: 20,
     author: '',
     timestamp: '',
-    meta_position: 'bottom'
+    meta_position: 'bottom',
+    watermark_text: '',
+    watermark_opacity: 0.2,
+    watermark_size: 16,
+    watermark_angle: -30,
+    watermark_color: '#888888',
+    watermark_enable: false,
+    watermark_gap: 120
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -208,7 +215,7 @@ function App() {
       // 使用 html2canvas 生成图片
       const canvas = await html2canvas(previewRef.current, {
         scale: 2, // 2倍缩放，提高清晰度
-        backgroundColor: config.background_color,
+        backgroundColor: null,
         width: config.canvas_width,
         height: config.canvas_height,
         windowWidth: config.canvas_width,
@@ -252,7 +259,14 @@ function App() {
       paragraph_spacing: 20,
       author: '',
       timestamp: '',
-      meta_position: 'bottom'
+      meta_position: 'bottom',
+      watermark_text: '',
+      watermark_opacity: 0.2,
+      watermark_size: 16,
+      watermark_angle: -30,
+      watermark_color: '#888888',
+      watermark_enable: false,
+      watermark_gap: 120
     });
     setSelectedTheme('light');
   };
@@ -515,6 +529,97 @@ function App() {
               </select>
             </div>
 
+            {/* 水印设置 */}
+            <div className="config-section-divider"></div>
+            <div className="config-group">
+              <div className="checkbox-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                <input
+                  type="checkbox"
+                  id="watermark_enable"
+                  checked={config.watermark_enable}
+                  onChange={(e) => setConfig({...config, watermark_enable: e.target.checked})}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                />
+                <label htmlFor="watermark_enable" style={{ marginBottom: 0, cursor: 'pointer', userSelect: 'none' }}>启用文字水印</label>
+              </div>
+            </div>
+
+            {config.watermark_enable && (
+              <>
+                <div className="config-group">
+                  <label>水印内容</label>
+                  <input
+                    type="text"
+                    value={config.watermark_text}
+                    onChange={(e) => setConfig({...config, watermark_text: e.target.value})}
+                    placeholder="输入水印文字"
+                  />
+                </div>
+
+                <div className="config-group">
+                  <label>水印颜色</label>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <input
+                      type="color"
+                      value={config.watermark_color}
+                      onChange={(e) => setConfig({...config, watermark_color: e.target.value})}
+                    />
+                    <input
+                      type="text"
+                      value={config.watermark_color}
+                      onChange={(e) => setConfig({...config, watermark_color: e.target.value})}
+                      className="color-input"
+                    />
+                  </div>
+                </div>
+
+                <div className="config-group">
+                  <label>透明度 ({Math.round(config.watermark_opacity * 100)}%)</label>
+                  <input
+                    type="range"
+                    min="0.05"
+                    max="1"
+                    step="0.05"
+                    value={config.watermark_opacity}
+                    onChange={(e) => setConfig({...config, watermark_opacity: parseFloat(e.target.value)})}
+                  />
+                </div>
+
+                <div className="config-group">
+                  <label>字体大小 ({config.watermark_size}px)</label>
+                  <input
+                    type="range"
+                    min="10"
+                    max="100"
+                    value={config.watermark_size}
+                    onChange={(e) => setConfig({...config, watermark_size: parseInt(e.target.value)})}
+                  />
+                </div>
+
+                <div className="config-group">
+                  <label>旋转角度 ({config.watermark_angle}°)</label>
+                  <input
+                    type="range"
+                    min="-180"
+                    max="180"
+                    value={config.watermark_angle}
+                    onChange={(e) => setConfig({...config, watermark_angle: parseInt(e.target.value)})}
+                  />
+                </div>
+
+                <div className="config-group">
+                  <label>水印间距 ({config.watermark_gap}px)</label>
+                  <input
+                    type="range"
+                    min="50"
+                    max="400"
+                    value={config.watermark_gap}
+                    onChange={(e) => setConfig({...config, watermark_gap: parseInt(e.target.value)})}
+                  />
+                </div>
+              </>
+            )}
+
             {/* 操作按钮 */}
             <div className="action-buttons">
               <button className="btn btn-secondary" onClick={resetConfig}>
@@ -578,6 +683,8 @@ function App() {
                   width: `${config.canvas_width}px`,
                   minHeight: `${config.canvas_height}px`,
                   boxSizing: 'border-box',
+                  position: 'relative',
+                  overflow: 'hidden'
                 }}
               >
                 {(config.author || config.timestamp) && config.meta_position === 'top' && (
@@ -611,6 +718,39 @@ function App() {
                     {config.author && config.timestamp && <span> · </span>}
                     {config.timestamp && <span>{config.timestamp}</span>}
                   </div>
+                )}
+
+                {config.watermark_enable && config.watermark_text && (
+                  <div 
+                    className="watermark-overlay"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      pointerEvents: 'none',
+                      zIndex: 10,
+                      backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(`
+                        <svg xmlns="http://www.w3.org/2000/svg" width="${config.watermark_gap}" height="${config.watermark_gap}">
+                          <text 
+                            x="50%" 
+                            y="50%" 
+                            fill="${config.watermark_color}" 
+                            font-size="${config.watermark_size}" 
+                            font-family="sans-serif"
+                            text-anchor="middle" 
+                            dominant-baseline="middle"
+                            opacity="${config.watermark_opacity}"
+                            transform="rotate(${config.watermark_angle}, ${config.watermark_gap/2}, ${config.watermark_gap/2})"
+                          >
+                            ${config.watermark_text}
+                          </text>
+                        </svg>
+                      `)}")`,
+                      backgroundRepeat: 'repeat'
+                    }}
+                  />
                 )}
               </div>
             </div>
