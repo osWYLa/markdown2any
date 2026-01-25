@@ -40,70 +40,86 @@ body {
 .app-content {
   flex: 1;
   display: flex;
-  gap: 2rem;
-  padding: 2rem;
-  max-width: 1800px;
+  padding: 1rem;
+  max-width: 100%;
   margin: 0 auto;
   width: 100%;
 }
 
-.left-panel {
-  flex: 1;
+.panel {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  min-height: 0; /* important for flex items containing scrollable areas */
 }
 
-.right-panel {
+.config-panel {
+  /* width is set via inline style */
+}
+
+.editor-panel {
+  /* width is set via inline style */
+}
+
+.preview-panel {
   flex: 1;
+  min-width: 300px;
+}
+
+.resizer {
+  width: 12px;
+  cursor: col-resize;
+  background: transparent;
   display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  transition: all 0.2s;
+  flex: none;
+}
+
+.resizer::after {
+  content: '';
+  width: 2px;
+  height: 40px;
+  background: #e0e0e0;
+  border-radius: 1px;
+  transition: all 0.2s;
+}
+
+.resizer:hover::after,
+.resizer.active::after {
+  background: #667eea;
+  height: 60px;
+  width: 4px;
 }
 
 .editor-section,
 .config-section,
-.preview-section,
-.result-section {
+.preview-section {
   background: white;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1.25rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.section-header {
+  height: 100%;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
+  flex-direction: column;
 }
 
-.section-header h2 {
-  font-size: 1.25rem;
-  color: #333;
-}
-
-.char-count {
-  font-size: 0.875rem;
-  color: #666;
-}
-
-h2 {
-  font-size: 1.25rem;
-  color: #333;
-  margin-bottom: 1rem;
+.editor-section {
+  flex: 1;
 }
 
 .markdown-editor {
+  flex: 1;
   width: 100%;
-  min-height: 300px;
+  min-height: 500px;
   padding: 1rem;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 0.875rem;
   line-height: 1.6;
-  resize: vertical;
+  resize: none;
   transition: border-color 0.3s;
 }
 
@@ -277,7 +293,6 @@ h2 {
   background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
   color: white;
   width: 100%;
-  margin-top: 1rem;
 }
 
 .btn-success:hover {
@@ -286,15 +301,35 @@ h2 {
 }
 
 .preview-section {
-  overflow-x: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-scroll-container {
+  flex: 1;
+  overflow: auto;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
 }
 
 .preview-container {
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  overflow: visible;
-  margin: 0 auto;
-  display: inline-block;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform-origin: top center;
+}
+
+.preview-actions {
+  padding-bottom: 1rem;
+}
+
+.result-section {
+  display: none;
 }
 
 .preview-container h1,
@@ -392,14 +427,24 @@ h2 {
 }
 
 /* 响应式设计 */
-@media (max-width: 1200px) {
+@media (max-width: 1400px) {
   .app-content {
-    flex-direction: column;
+    flex-wrap: wrap;
   }
   
-  .left-panel,
-  .right-panel {
-    width: 100%;
+  .config-panel {
+    flex: 0 0 300px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .config-panel {
+    flex: 1 1 100%;
+  }
+  
+  .editor-panel,
+  .preview-panel {
+    flex: 1 1 calc(50% - 0.5rem);
   }
 }
 
@@ -409,8 +454,13 @@ h2 {
   }
   
   .app-content {
-    padding: 1rem;
-    gap: 1rem;
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+  
+  .editor-panel,
+  .preview-panel {
+    flex: 1 1 100%;
   }
   
   .action-buttons {
@@ -418,10 +468,10 @@ h2 {
   }
   
   .theme-selector {
-    flex-direction: column;
+    flex-direction: row;
   }
   
   .theme-btn {
-    width: 100%;
+    width: auto;
   }
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import html2canvas from 'html2canvas';
 import './App.css';
@@ -63,11 +63,47 @@ function App() {
     timestamp: '',
     meta_position: 'bottom'
   });
-  const [generatedImage, setGeneratedImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedTheme, setSelectedTheme] = useState('light');
+  const [leftWidth, setLeftWidth] = useState(350);
+  const [middleWidth, setMiddleWidth] = useState(600);
+  const [isResizingLeft, setIsResizingLeft] = useState(false);
+  const [isResizingRight, setIsResizingRight] = useState(false);
   const previewRef = useRef(null);
+
+  // 面板调整逻辑
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (isResizingLeft) {
+        const newWidth = Math.max(250, Math.min(600, e.clientX));
+        setLeftWidth(newWidth);
+      } else if (isResizingRight) {
+        const newWidth = Math.max(300, Math.min(1000, e.clientX - leftWidth));
+        setMiddleWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizingLeft(false);
+      setIsResizingRight(false);
+      document.body.style.cursor = 'default';
+    };
+
+    if (isResizingLeft || isResizingRight) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    } else {
+      document.body.style.userSelect = 'auto';
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizingLeft, isResizingRight, leftWidth]);
 
   // 应用主题
   const applyTheme = (themeId) => {
@@ -90,8 +126,8 @@ function App() {
     }));
   };
 
-  // 生成图片
-  const generateImage = async () => {
+  // 下载图片
+  const downloadImage = async () => {
     setLoading(true);
     setError(null);
     
@@ -125,27 +161,20 @@ function App() {
         useCORS: true, // 支持跨域图片
       });
 
-      // 转换为 base64
+      // 转换为 base64 并下载
       const imageData = canvas.toDataURL('image/png', 1.0);
-      setGeneratedImage(imageData);
+      const link = document.createElement('a');
+      link.href = imageData;
+      link.download = `markdown-image-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } catch (err) {
       setError(err.message || '生成图片时发生未知错误');
       console.error('Error generating image:', err);
     } finally {
       setLoading(false);
     }
-  };
-
-  // 下载图片
-  const downloadImage = () => {
-    if (!generatedImage) return;
-
-    const link = document.createElement('a');
-    link.href = generatedImage;
-    link.download = `markdown-image-${Date.now()}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   // 重置配置
@@ -176,21 +205,8 @@ function App() {
       </header>
 
       <div className="app-content">
-        {/* 左侧编辑区 */}
-        <div className="left-panel">
-          <div className="editor-section">
-            <div className="section-header">
-              <h2>Markdown 编辑器</h2>
-              <span className="char-count">{markdownContent.length} 字符</span>
-            </div>
-            <textarea
-              className="markdown-editor"
-              value={markdownContent}
-              onChange={(e) => setMarkdownContent(e.target.value)}
-              placeholder="在此输入 Markdown 内容..."
-            />
-          </div>
-
+        {/* 左侧：配置面板 */}
+        <div className="panel config-panel" style={{ width: `${leftWidth}px`, flex: 'none' }}>
           <div className="config-section">
             <h2>配置面板</h2>
 
@@ -377,9 +393,6 @@ function App() {
 
             {/* 操作按钮 */}
             <div className="action-buttons">
-              <button className="btn btn-primary" onClick={generateImage} disabled={loading}>
-                {loading ? '生成中...' : '🎨 生成图片'}
-              </button>
               <button className="btn btn-secondary" onClick={resetConfig}>
                 🔄 重置配置
               </button>
@@ -387,67 +400,91 @@ function App() {
           </div>
         </div>
 
-        {/* 右侧预览区 */}
-        <div className="right-panel">
+        <div 
+          className={`resizer ${isResizingLeft ? 'active' : ''}`} 
+          onMouseDown={() => setIsResizingLeft(true)}
+        />
+
+        {/* 中间：编辑器 */}
+        <div className="panel editor-panel" style={{ width: `${middleWidth}px`, flex: 'none' }}>
+          <div className="editor-section">
+            <div className="section-header">
+              <h2>Markdown 编辑器</h2>
+              <span className="char-count">{markdownContent.length} 字符</span>
+            </div>
+            <textarea
+              className="markdown-editor"
+              value={markdownContent}
+              onChange={(e) => setMarkdownContent(e.target.value)}
+              placeholder="在此输入 Markdown 内容..."
+            />
+          </div>
+        </div>
+
+        <div 
+          className={`resizer ${isResizingRight ? 'active' : ''}`} 
+          onMouseDown={() => setIsResizingRight(true)}
+        />
+
+        {/* 右侧：预览和下载 */}
+        <div className="panel preview-panel">
           <div className="preview-section">
             <h2>预览</h2>
-            <div 
-              ref={previewRef}
-              className="preview-container"
-              style={{
-                backgroundColor: config.background_color,
-                color: config.text_color,
-                padding: `${config.padding}px`,
-                fontSize: `${config.font_size}px`,
-                lineHeight: config.line_height,
-                width: `${config.canvas_width}px`,
-                minHeight: `${config.canvas_height}px`,
-                boxSizing: 'border-box',
-              }}
-            >
-              {(config.author || config.timestamp) && config.meta_position === 'top' && (
-                <div className="meta-info" style={{fontSize: `${config.font_size * 0.875}px`, marginBottom: `${config.padding}px`}}>
-                  {config.author && <span>{config.author}</span>}
-                  {config.author && config.timestamp && <span> · </span>}
-                  {config.timestamp && <span>{config.timestamp}</span>}
-                </div>
-              )}
-
-              <ReactMarkdown
-                components={{
-                  h1: ({node, ...props}) => <h1 style={{color: config.accent_color}} {...props} />,
-                  h2: ({node, ...props}) => <h2 style={{color: config.accent_color}} {...props} />,
-                  h3: ({node, ...props}) => <h3 style={{color: config.accent_color}} {...props} />,
-                  h4: ({node, ...props}) => <h4 style={{color: config.accent_color}} {...props} />,
-                  strong: ({node, ...props}) => <strong style={{color: config.accent_color}} {...props} />,
-                  a: ({node, ...props}) => <a style={{color: config.accent_color}} {...props} />,
-                }}
+            <div className="preview-actions">
+              <button 
+                className="btn btn-success" 
+                onClick={downloadImage} 
+                disabled={loading}
               >
-                {markdownContent}
-              </ReactMarkdown>
-              
-              {(config.author || config.timestamp) && config.meta_position === 'bottom' && (
-                <div className="meta-info" style={{fontSize: `${config.font_size * 0.875}px`, marginTop: `${config.padding}px`}}>
-                  {config.author && <span>{config.author}</span>}
-                  {config.author && config.timestamp && <span> · </span>}
-                  {config.timestamp && <span>{config.timestamp}</span>}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* 生成结果 */}
-          {generatedImage && (
-            <div className="result-section">
-              <h2>生成结果</h2>
-              <div className="result-image">
-                <img src={generatedImage} alt="Generated" />
-              </div>
-              <button className="btn btn-success" onClick={downloadImage}>
-                ⬇️ 下载图片
+                {loading ? '生成中...' : '⬇️ 下载图片'}
               </button>
             </div>
-          )}
+            <div className="preview-scroll-container">
+              <div 
+                ref={previewRef}
+                className="preview-container"
+                style={{
+                  backgroundColor: config.background_color,
+                  color: config.text_color,
+                  padding: `${config.padding}px`,
+                  fontSize: `${config.font_size}px`,
+                  lineHeight: config.line_height,
+                  width: `${config.canvas_width}px`,
+                  minHeight: `${config.canvas_height}px`,
+                  boxSizing: 'border-box',
+                }}
+              >
+                {(config.author || config.timestamp) && config.meta_position === 'top' && (
+                  <div className="meta-info" style={{fontSize: `${config.font_size * 0.875}px`, marginBottom: `${config.padding}px`}}>
+                    {config.author && <span>{config.author}</span>}
+                    {config.author && config.timestamp && <span> · </span>}
+                    {config.timestamp && <span>{config.timestamp}</span>}
+                  </div>
+                )}
+
+                <ReactMarkdown
+                  components={{
+                    h1: ({...props}) => <h1 style={{color: config.accent_color}} {...props} />,
+                    h2: ({...props}) => <h2 style={{color: config.accent_color}} {...props} />,
+                    h3: ({...props}) => <h3 style={{color: config.accent_color}} {...props} />,
+                    h4: ({...props}) => <h4 style={{color: config.accent_color}} {...props} />,
+                    strong: ({...props}) => <strong style={{color: config.accent_color}} {...props} />,
+                    a: ({...props}) => <a style={{color: config.accent_color}} {...props} />,
+                  }}
+                >
+                  {markdownContent}
+                </ReactMarkdown>
+                
+                {(config.author || config.timestamp) && config.meta_position === 'bottom' && (
+                  <div className="meta-info" style={{fontSize: `${config.font_size * 0.875}px`, marginTop: `${config.padding}px`}}>
+                    {config.author && <span>{config.author}</span>}
+                    {config.author && config.timestamp && <span> · </span>}
+                    {config.timestamp && <span>{config.timestamp}</span>}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
           {/* 错误提示 */}
           {error && (
