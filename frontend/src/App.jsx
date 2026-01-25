@@ -145,6 +145,11 @@ function App() {
   const previewRef = useRef(null);
   const editorRef = useRef(null);
 
+  // 监听语言切换，更新默认Markdown内容
+  useEffect(() => {
+    setMarkdownContent(t('defaultMarkdown'));
+  }, [i18n.language, t]);
+
   // 工具栏操作函数
   const handleEditorAction = (type) => {
     const textarea = editorRef.current;
