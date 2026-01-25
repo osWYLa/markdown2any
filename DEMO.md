@@ -2,7 +2,6 @@
 
 ## 当前运行状态
 
-✅ 后端服务: http://localhost:3001
 ✅ 前端应用: http://localhost:5173
 
 ## 立即体验
@@ -22,9 +21,8 @@
 
 ### 生成图片
 1. 编辑好内容
-2. 点击紫色的"🎨 生成图片"按钮
-3. 等待 2-5 秒
-4. 看到生成的图片后,点击"⬇️ 下载图片"
+2. 点击绿色的"⬇️ 下载图片"按钮
+3. 系统会立即生成并触发图片下载
 
 ### 社交媒体尺寸
 点击这些按钮快速设置尺寸:
@@ -62,30 +60,6 @@
 *—— 写于 2026 年初*
 ```
 
-## 快捷测试
-
-### 测试后端 API
-
-```bash
-curl http://localhost:3001/api/health
-```
-
-应该返回: `{"status":"ok"}`
-
-### 测试图片生成
-
-```bash
-curl -X POST http://localhost:3001/api/generate \
-  -H "Content-Type: application/json" \
-  -d '{
-    "markdown_content": "# Hello World\n\nThis is a **test**.",
-    "config": {
-      "canvas_width": 800,
-      "canvas_height": 600
-    }
-  }'
-```
-
 ## 停止服务
 
 在运行服务的终端中按 `Ctrl+C` 停止服务器。
@@ -96,11 +70,7 @@ curl -X POST http://localhost:3001/api/generate \
 # 方式 1: 使用启动脚本
 ./start.sh
 
-# 方式 2: 分别启动
-# 终端 1
-cd backend && npm start
-
-# 终端 2  
+# 方式 2: 直接启动前端
 cd frontend && npm run dev
 ```
 

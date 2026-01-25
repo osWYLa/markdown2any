@@ -43,12 +43,7 @@
 - **React** - 用户界面框架
 - **Vite** - 快速的开发构建工具
 - **React-Markdown** - Markdown 渲染
-
-### 后端
-- **Node.js** - 运行时环境
-- **Express** - Web 服务器框架
-- **Puppeteer** - 无头浏览器,用于高质量截图
-- **Marked** - Markdown 解析库
+- **html2canvas** - 纯前端图片生成
 
 ## 📦 安装和运行
 
@@ -66,17 +61,10 @@ git clone https://github.com/slsefe/markdown-to-image-generator.git
 cd markdown-to-image-generator
 ```
 
-2. **安装后端依赖**
+2. **安装依赖**
 
 ```bash
-cd backend
-npm install
-```
-
-3. **安装前端依赖**
-
-```bash
-cd ../frontend
+cd frontend
 npm install
 ```
 
@@ -84,25 +72,15 @@ npm install
 
 #### 开发模式
 
-1. **启动后端服务器**
+1. **启动开发服务器**
 
 ```bash
-cd backend
-npm start
-```
-
-后端服务器将在 `http://localhost:3001` 运行
-
-2. **启动前端开发服务器** (新终端窗口)
-
-```bash
-cd frontend
 npm run dev
 ```
 
 前端应用将在 `http://localhost:5173` 运行
 
-3. **访问应用**
+2. **访问应用**
 
 在浏览器中打开 `http://localhost:5173`
 
@@ -153,24 +131,6 @@ npm run dev
 - 文字: 棕褐 (#5D4E37)
 - 强调: 橙棕 (#D2691E)
 
-## 🔧 配置说明
-
-### 后端配置
-
-后端服务器端口可以通过环境变量配置:
-
-```bash
-PORT=3001 npm start
-```
-
-### Puppeteer 配置
-
-Puppeteer 会在首次运行时自动下载 Chromium。如果遇到下载问题,可以:
-
-1. 配置代理
-2. 使用本地 Chrome
-3. 使用 `PUPPETEER_SKIP_CHROMIUM_DOWNLOAD` 跳过下载
-
 ## 📁 项目结构
 
 ```
@@ -183,19 +143,14 @@ markdown-to-image-generator/
 │   │   └── index.css        # 全局样式
 │   ├── package.json
 │   └── vite.config.js
-│
-├── backend/                  # 后端服务
-│   ├── server.js            # Express 服务器和 API
-│   └── package.json
-│
 └── README.md                # 项目文档
 ```
 
 ## 🚀 部署
 
-### 前端部署
+### 静态部署 (推荐)
 
-前端可以部署到任何静态网站托管服务:
+由于本项目已实现纯前端图片生成，您可以将其部署到任何静态网站托管服务（如 Vercel, Netlify, GitHub Pages 等）：
 
 1. **构建生产版本**
 
@@ -204,68 +159,13 @@ cd frontend
 npm run build
 ```
 
-2. **部署 dist 目录** 到服务器或托管平台 (Vercel, Netlify, GitHub Pages 等)
-
-### 后端部署
-
-后端需要 Node.js 环境支持:
-
-1. **部署到服务器** (VPS, AWS, Azure 等)
-2. **使用 PM2 管理进程**
-
-```bash
-npm install -g pm2
-pm2 start server.js
-```
-
-3. **配置 Nginx 反向代理** (可选)
-
-### Docker 部署 (推荐)
-
-```dockerfile
-# 后端 Dockerfile 示例
-FROM node:18
-RUN apt-get update && apt-get install -y \
-    chromium \
-    && rm -rf /var/lib/apt/lists/*
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-EXPOSE 3001
-CMD ["npm", "start"]
-```
+2. **部署 dist 目录** 到托管平台。
 
 ## ⚠️ 注意事项
 
 1. **内容限制**: 建议内容控制在 10000 字符以内
-2. **生成时间**: 图片生成通常需要 2-5 秒,取决于内容复杂度
-3. **资源消耗**: Puppeteer 比较消耗资源,生产环境建议配置合理的服务器规格
-4. **字体支持**: 确保系统安装了中文字体,否则可能显示方块
-5. **跨域问题**: 开发时前后端分离,生产环境建议使用同域名或配置 CORS
-
-## 🐛 常见问题
-
-### Q1: Puppeteer 安装失败?
-
-A: 可能是网络问题导致 Chromium 下载失败。解决方法:
-- 配置 npm 代理
-- 使用淘宝镜像: `npm config set puppeteer_download_host=https://npm.taobao.org/mirrors`
-
-### Q2: 生成的图片中文显示为方块?
-
-A: 系统缺少中文字体。解决方法:
-- macOS: 自带中文字体,无需处理
-- Linux: 安装中文字体包 `sudo apt-get install fonts-wqy-microhei`
-- Docker: 在 Dockerfile 中安装字体
-
-### Q3: 生成图片失败?
-
-A: 检查:
-- 后端服务是否正常运行
-- 浏览器控制台是否有错误信息
-- 网络连接是否正常
-- Puppeteer 是否成功安装
+2. **浏览器支持**: 建议使用现代浏览器以获得最佳的图片生成效果
+3. **本地存储**: 配置信息目前保存在内存中，刷新页面会重置
 
 ## 🗺 开发路线图
 
