@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 import html2canvas from 'html2canvas';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -917,17 +918,30 @@ ${selection || t('toolbar.codeblockText')}
 
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeRaw]}
                   components={{
                     h1: ({...props}) => <h1 style={{color: config.accent_color}} {...props} />,
                     h2: ({...props}) => <h2 style={{color: config.accent_color}} {...props} />,
                     h3: ({...props}) => <h3 style={{color: config.accent_color}} {...props} />,
                     h4: ({...props}) => <h4 style={{color: config.accent_color}} {...props} />,
                     strong: ({...props}) => <strong style={{color: config.accent_color}} {...props} />,
+                    em: ({...props}) => <em style={{fontStyle: 'italic', fontFamily: 'Georgia, "Times New Roman", STKaiti, KaiTi, serif'}} {...props} />,
+                    blockquote: ({...props}) => (
+                      <blockquote 
+                        style={{
+                          borderLeftColor: config.accent_color,
+                          backgroundColor: config.background_color === '#FFFFFF' ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.05)'
+                        }} 
+                        {...props} 
+                      />
+                    ),
+                    del: ({...props}) => <del style={{color: config.accent_color}} {...props} />,
+                    u: ({...props}) => <u style={{color: config.accent_color}} {...props} />,
                     a: ({...props}) => <a style={{color: config.accent_color}} {...props} />,
                     table: ({...props}) => <table style={{borderColor: config.accent_color}} {...props} />,
                     th: ({...props}) => <th style={{backgroundColor: config.accent_color, color: config.background_color}} {...props} />,
                     td: ({...props}) => <td style={{borderColor: config.accent_color}} {...props} />,
-                    code: ({node, inline, className, children, ...props}) => {
+                    code: ({inline, className, children, ...props}) => {
                       const match = /language-(\w+)/.exec(className || '');
                       const isDark = config.background_color === '#1a1a1a' || config.background_color === '#121212' || config.background_color === '#001F3F';
                       

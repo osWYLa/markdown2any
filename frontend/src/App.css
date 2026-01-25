@@ -469,6 +469,19 @@ body {
   margin-bottom: 1rem;
 }
 
+.preview-container blockquote {
+  margin: 1.5rem 0;
+  padding: 0.5rem 1rem;
+  border-left: 4px solid;
+  background-color: rgba(0, 0, 0, 0.03);
+  font-style: italic;
+  opacity: 0.85;
+}
+
+.preview-container blockquote p {
+  margin-bottom: 0;
+}
+
 .preview-container ul,
 .preview-container ol {
   margin-bottom: 1rem;
@@ -490,6 +503,7 @@ body {
 
 .preview-container em {
   font-style: italic;
+  font-family: Georgia, "Times New Roman", STKaiti, KaiTi, serif;
 }
 
 .preview-container table {

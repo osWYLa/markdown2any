@@ -64,7 +64,7 @@
     "instagram_portrait": "Instagram 竖图",
     "xiaohongshu": "小红书"
   },
-  "defaultMarkdown": "# 欢迎使用 Markdown 转图片生成器\n\n这是一个**简单**的示例。\n\n## 支持的功能\n\n- 无序列表项 1\n- 无序列表项 2\n\n1. 有序列表项 1\n2. 有序列表项 2\n\n这里有*斜体*和**粗体**文本。\n\n### 表格功能\n\n| 功能 | 支持 | 说明 |\n|------|------|------|\n| 标题 | ✅ | H1-H6 |\n| 列表 | ✅ | 有序/无序 |\n| 表格 | ✅ | GFM 语法 |\n| 链接 | ✅ | [文本](链接) |\n| 代码 | ✅ | 语法高亮 |\n\n### 代码示例\n\n```javascript\nfunction greet(name) {\n  console.log(`Hello, ${name}!`);\n  return name;\n}\n\ngreet(\"World\");\n```\n\n[这是一个链接](https://example.com)",
+  "defaultMarkdown": "# 欢迎使用 Markdown 转图片生成器\n\n这是一个**简单**的示例。\n\n## 支持的功能\n\n- 无序列表项 1\n- 无序列表项 2\n\n1. 有序列表项 1\n2. 有序列表项 2\n\n这里有*斜体*、**粗体**、<u>下划线</u>和~~删除线~~文本。\n\n> 这是一个引用示例,用于展示引用样式。\n\n### 表格功能\n\n| 功能 | 支持 | 说明 |\n|------|------|------|\n| 标题 | ✅ | H1-H6 |\n| 列表 | ✅ | 有序/无序 |\n| 表格 | ✅ | GFM 语法 |\n| 链接 | ✅ | [文本](链接) |\n| 代码 | ✅ | 语法高亮 |\n\n### 代码示例\n\n```javascript\nfunction greet(name) {\n  console.log(`Hello, ${name}!`);\n  return name;\n}\n\ngreet(\"World\");\n```\n\n[这是一个链接](https://example.com)",
   "toolbar": {
     "h1": "一级标题",
     "h2": "二级标题",

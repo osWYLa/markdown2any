@@ -64,7 +64,7 @@
     "instagram_portrait": "Instagram Portrait",
     "xiaohongshu": "Xiaohongshu"
   },
-  "defaultMarkdown": "# Welcome to Markdown to Image Generator\n\nThis is a **simple** example.\n\n## Supported Features\n\n- Unordered list item 1\n- Unordered list item 2\n\n1. Ordered list item 1\n2. Ordered list item 2\n\nHere is *italic* and **bold** text.\n\n### Table Feature\n\n| Feature | Support | Description |\n|---------|---------|-------------|\n| Heading | ✅ | H1-H6 |\n| List | ✅ | Ordered/Unordered |\n| Table | ✅ | GFM Syntax |\n| Link | ✅ | [Text](URL) |\n| Code | ✅ | Syntax Highlighting |\n\n### Code Example\n\n```javascript\nfunction greet(name) {\n  console.log(`Hello, ${name}!`);\n  return name;\n}\n\ngreet(\"World\");\n```\n\n[This is a link](https://example.com)",
+  "defaultMarkdown": "# Welcome to Markdown to Image Generator\n\nThis is a **simple** example.\n\n## Supported Features\n\n- Unordered list item 1\n- Unordered list item 2\n\n1. Ordered list item 1\n2. Ordered list item 2\n\nHere is *italic*, **bold**, <u>underline</u> and ~~strikethrough~~ text.\n\n> This is a blockquote example to show the quote style.\n\n### Table Feature\n\n| Feature | Support | Description |\n|---------|---------|-------------|\n| Heading | ✅ | H1-H6 |\n| List | ✅ | Ordered/Unordered |\n| Table | ✅ | GFM Syntax |\n| Link | ✅ | [Text](URL) |\n| Code | ✅ | Syntax Highlighting |\n\n### Code Example\n\n```javascript\nfunction greet(name) {\n  console.log(`Hello, ${name}!`);\n  return name;\n}\n\ngreet(\"World\");\n```\n\n[This is a link](https://example.com)",
   "toolbar": {
     "h1": "Heading 1",
     "h2": "Heading 2",
