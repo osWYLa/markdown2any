@@ -1,0 +1,6 @@
+{
+  "markdown": "# Code Test\n\n```javascript\nconsole.log('hello world');\nconst x = 42;\n```\n\nAnd inline `code` too.",
+  "theme": "dark",
+  "format": "png",
+  "scale": 1
+}

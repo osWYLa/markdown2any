@@ -1,0 +1,11 @@
+{
+  "markdown": "# Watermark Test\n\nThis canvas has a tiled watermark overlay.",
+  "config": {
+    "watermark_enable": true,
+    "watermark_text": "CONFIDENTIAL",
+    "watermark_opacity": 0.15,
+    "watermark_angle": -30
+  },
+  "format": "png",
+  "scale": 1
+}

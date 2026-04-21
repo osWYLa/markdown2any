@@ -1,0 +1,13 @@
+{
+  "markdown": "# Gradient Test\n\nBeautiful gradient background.",
+  "config": {
+    "is_gradient": true,
+    "gradient_start": "#667eea",
+    "gradient_end": "#764ba2",
+    "gradient_angle": 135,
+    "text_color": "#ffffff",
+    "accent_color": "#ffffff"
+  },
+  "format": "png",
+  "scale": 1
+}

@@ -1,0 +1,5 @@
+{
+  "markdown": "# Hello World\n\nThis is a **plain** test with *italic* and a [link](https://example.com).\n\n- Item 1\n- Item 2\n- Item 3",
+  "format": "png",
+  "scale": 1
+}

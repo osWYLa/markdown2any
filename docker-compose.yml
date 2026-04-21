@@ -1,0 +1,66 @@
+# One-click deploy: docker compose up --build -d
+#
+# NOTE: By default the app is only accessible from localhost (127.0.0.1:8080).
+# To expose publicly, change the frontend ports line to:
+#   ports: ["0.0.0.0:8080:80"]
+# or put a reverse proxy (Caddy / Nginx / Traefik) in front.
+# No authentication is enabled — add auth before exposing publicly.
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:8080:80"
+    depends_on:
+      renderer:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - mdimg_net
+
+  renderer:
+    build:
+      context: ./renderer
+      dockerfile: Dockerfile
+    environment:
+      FRONTEND_URL: http://frontend
+      MAX_CONCURRENCY: "2"
+      NODE_ENV: production
+    shm_size: "1gb"
+    init: true
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then(r=>r.ok?process.exit(0):process.exit(1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - mdimg_net
+
+networks:
+  mdimg_net:
+    driver: bridge
+
+# ── Optional: TLS + basic auth via Caddy ────────────────────────────────────
+# Uncomment to add a public-facing HTTPS proxy in front of the frontend.
+#
+#   caddy:
+#     image: caddy:2-alpine
+#     profiles: [proxy]
+#     ports:
+#       - "80:80"
+#       - "443:443"
+#     volumes:
+#       - ./Caddyfile:/etc/caddy/Caddyfile
+#       - caddy_data:/data
+#     networks:
+#       - mdimg_net
+#
+# volumes:
+#   caddy_data:
