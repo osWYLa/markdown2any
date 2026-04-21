@@ -1,207 +1,192 @@
-# 📝 Markdown 转图片生成器
+# Markdown to Image Generator
 
-一个在线 Web 应用,可以将 Markdown 文本转换为精美的高清图片,非常适合社交媒体内容分享。
+将 Markdown 文本转换为精美图片的在线工具，支持浏览器直接导出和服务端 API 两种模式。
 
-![Demo](demo.jpg)
+## 功能特性
 
-## ✨ 功能特性
+- **Markdown 编辑** — 实时预览，工具栏支持常用语法快捷插入，编辑内容自动保存至本地
+- **8 个预设主题** — 简约明亮、深色优雅、温暖舒适、森林气息、海洋之心、复古风格、午夜之魅、樱花物语
+- **GFM 语法** — 表格、任务列表、删除线、代码高亮（多语言）
+- **灵活配置** — 画布尺寸（5 个社交平台预设）、字体、颜色/渐变背景、间距
+- **水印** — 可自定义内容、颜色、透明度、角度、密度
+- **元信息** — 作者 / 时间戳，位置可选顶部或底部
+- **导出选项** — PNG / JPEG / WebP，1x / 2x / 3x 分辨率，自动高度（防内容截断）
+- **一键导出** — 浏览器端下载或复制到剪贴板（Safari 兼容）
+- **HTTP API** — `POST /api/render` 接受 JSON，返回图片二进制，可集成到任意脚本或服务
 
-### 核心功能 (MVP)
+## 快速开始
 
-- ✅ **Markdown 文本编辑** - 支持实时编辑和预览
-- ✅ **支持的 Markdown 语法**:
-  - H1-H6 标题
-  - 无序列表 & 有序列表
-  - 粗体 & 斜体
-  - 引用 (Blockquote)
-  - 链接 & 图片
-  - **GFM 扩展**: 表格、任务列表、删除线、自动链接
-  - **代码高亮**: 支持多种编程语言语法高亮
-- ✅ **8 个预设主题**:
-  - 包含 简约明亮、深色优雅、温暖舒适、森林气息、海洋之心、复古风格、午夜之魅、樱花物语
-- ✅ **灵活配置**:
-  - 画布尺寸自定义及 5 个社交媒体预设 (微信、微博、Instagram、小红书)
-  - 字体大小调整
-  - 颜色自定义 (背景、文字、强调色)
-  - **渐变背景**: 支持自定义角度和起始颜色
-  - 间距控制 (内边距、行间距、段落间距)
-- ✅ **元信息** - 支持添加作者和时间信息，位置可选 (顶部/底部)
-- ✅ **水印功能** - 支持自定义平铺水印内容、颜色、透明度及角度
-- ✅ **高清图片生成** - 使用 2x DPI 确保清晰度
-- ✅ **一键操作** - 支持下载图片到本地或直接复制到剪贴板
-
-## 🎯 适用场景
-
-- 📱 社交媒体内容创作 (微信朋友圈、微博、Instagram)
-- 📝 笔记分享和知识传播
-- 💡 个人想法和观点表达
-- 🎨 文字排版和设计
-
-## 🛠 技术栈
-
-### 前端
-- **React** - 用户界面框架
-- **Vite** - 快速的开发构建工具
-- **React-Markdown** - Markdown 渲染
-- **html2canvas** - 纯前端图片生成
-
-## 📦 安装和运行
-
-### 前置要求
-
-- Node.js 18+ 
-- npm 或 yarn
-
-### 安装步骤
-
-1. **克隆仓库**
-
-```bash
-git clone https://github.com/slsefe/markdown-to-image-generator.git
-cd markdown-to-image-generator
-```
-
-2. **安装依赖**
+### 浏览器模式（仅前端）
 
 ```bash
 cd frontend
 npm install
+npm run dev
+# 访问 http://localhost:5173
 ```
 
-### 启动应用
+### 完整模式（前端 + 渲染 API）
 
-#### 开发模式
-
-1. **启动开发服务器**
+需要安装 [Docker](https://docs.docker.com/get-docker/)。
 
 ```bash
-npm run dev
+docker compose up --build -d
+# 访问 http://127.0.0.1:8080
 ```
 
-前端应用将在 `http://localhost:5173` 运行
+健康检查：
 
-2. **访问应用**
+```bash
+curl http://127.0.0.1:8080/api/health
+```
 
-在浏览器中打开 `http://localhost:5173`
+### API 快速调用
 
-## 📖 使用指南
+```bash
+curl -X POST http://127.0.0.1:8080/api/render \
+  -H 'content-type: application/json' \
+  -d '{"markdown":"# Hello\n\n**bold**","theme":"dark","format":"png","scale":2}' \
+  --output out.png
+```
 
-### 基本使用流程
+详细 API 文档见 [docs/api.md](docs/api.md)。
 
-1. **输入内容** - 在左侧编辑器中输入或粘贴 Markdown 内容
-2. **实时预览** - 右侧会实时显示渲染效果
-3. **选择主题/自定义** - 从 8 个预设主题中选择，或手动调整背景、颜色、渐变和水印
-4. **调整尺寸** - 选择社交媒体预设或手动输入宽高
-5. **生成与分享** - 点击"下载图片"保存到本地，或点击"复制图片"直接在社交软件中粘贴
-
-### 画布尺寸推荐
-
-| 平台 | 推荐尺寸 | 比例 |
-|------|---------|------|
-| 微信朋友圈 | 1080 x 1260 | 6:7 |
-| 微博竖图 | 1080 x 1920 | 9:16 |
-| Instagram 方图 | 1080 x 1080 | 1:1 |
-| Instagram 竖图 | 1080 x 1350 | 4:5 |
-| 小红书 | 1080 x 1440 | 3:4 |
-
-### 样式配置说明
-
-- **字体大小**: 12-32px,默认 16px
-- **内边距**: 20-80px,控制内容与边缘的距离
-- **行间距**: 1.2-2.5,控制行与行之间的距离
-- **段落间距**: 10-40px,控制段落之间的间隔
-
-## 🎨 主题自定义
-
-应用提供 3 个预设主题,也可以自定义颜色:
-
-### 简约明亮
-- 背景: 白色 (#FFFFFF)
-- 文字: 深灰 (#333333)
-- 强调: 蓝色 (#007AFF)
-
-### 深色优雅
-- 背景: 深黑 (#1a1a1a)
-- 文字: 浅灰 (#E5E5E5)
-- 强调: 亮蓝 (#4A9EFF)
-
-### 温暖舒适
-- 背景: 米黄 (#FFF8F0)
-- 文字: 棕褐 (#5D4E37)
-- 强调: 橙棕 (#D2691E)
-
-## 📁 项目结构
+## 项目结构
 
 ```
 markdown-to-image-generator/
-├── frontend/                 # 前端应用
+├── frontend/                       # React + Vite 前端
 │   ├── src/
-│   │   ├── App.jsx          # 主应用组件
-│   │   ├── App.css          # 样式文件
-│   │   ├── main.jsx         # 入口文件
-│   │   └── index.css        # 全局样式
-│   ├── package.json
-│   └── vite.config.js
-└── README.md                # 项目文档
+│   │   ├── main.jsx                # 入口，挂载 AppRouter
+│   │   ├── AppRouter.jsx           # 路由：/ → App，/render → RenderRoute
+│   │   ├── App.jsx                 # 主界面（~100 行）
+│   │   ├── render/                 # 纯渲染层（无 UI 依赖，被前端和 Playwright 共用）
+│   │   │   ├── PreviewCanvas.jsx   # 画布组件（forwardRef）
+│   │   │   ├── defaultConfig.js    # 配置默认值
+│   │   │   ├── themes.js           # 8 个预设主题
+│   │   │   ├── presetSizes.js      # 社交平台尺寸预设
+│   │   │   ├── colorUtils.js       # WCAG 亮度计算
+│   │   │   ├── validators.js       # 输入校验
+│   │   │   ├── exportImage.js      # html2canvas 导出封装
+│   │   │   ├── preview.css         # 画布样式
+│   │   │   └── components/         # MarkdownRenderer, MetaInfo, Watermark
+│   │   ├── ui/                     # 交互 UI 组件
+│   │   │   ├── ConfigPanel.jsx
+│   │   │   ├── Editor.jsx
+│   │   │   ├── Toolbar.jsx
+│   │   │   ├── ExportActions.jsx
+│   │   │   ├── insertText.js       # execCommand 插入（保留撤销栈）
+│   │   │   └── config-sections/    # CanvasSize, Typography, Color, Meta, Watermark, Export
+│   │   ├── hooks/
+│   │   │   ├── usePersistentMarkdown.js  # localStorage 持久化，不随语言切换重置
+│   │   │   ├── useResizablePanels.js     # 面板拖拽（pointer events）
+│   │   │   └── useExportImage.js         # 导出状态管理
+│   │   ├── routes/
+│   │   │   └── RenderRoute.jsx     # Playwright 无头渲染入口，设置 window.__renderReady
+│   │   └── i18n/                   # 中英文翻译
+│   ├── Dockerfile                  # 多阶段：node → nginx
+│   └── nginx.conf                  # SPA fallback + /api 反代
+├── renderer/                       # Node.js 渲染服务（Express + Playwright）
+│   ├── src/
+│   │   ├── server.js               # HTTP 路由，优雅关闭
+│   │   ├── render.js               # Playwright 截图流水线
+│   │   ├── browser.js              # 浏览器单例 + 页面池 + 自动重启
+│   │   ├── queue.js                # p-queue 并发控制 + 超时
+│   │   ├── schema.js               # Ajv 参数校验
+│   │   ├── config.js               # 环境变量
+│   │   └── logger.js               # pino 日志
+│   ├── test/
+│   │   ├── fixtures/               # 4 个测试用例（plain, codeblock, watermark, gradient）
+│   │   ├── snapshots/              # 基准截图（首次运行 UPDATE_SNAPSHOTS=1 生成）
+│   │   └── render.test.js          # Jest + pixelmatch 像素对比
+│   └── Dockerfile
+├── docs/
+│   └── api.md                      # API 文档与示例
+├── .github/workflows/ci.yml        # GitHub Actions：构建 + 快照测试
+└── docker-compose.yml              # 一键启动
 ```
 
-## 🚀 部署
+## 架构说明
 
-### 静态部署 (推荐)
+```
+Browser ──HTTP:8080──▶ nginx (frontend)
+                           │  /           → SPA (React)
+                           │  /render     → SPA (RenderRoute, Playwright 专用)
+                           └  /api/*  ──▶ renderer:3000 (Express + Playwright)
+```
 
-由于本项目已实现纯前端图片生成，您可以将其部署到任何静态网站托管服务（如 Vercel, Netlify, GitHub Pages 等）：
+- **前端** 负责浏览器内渲染（html2canvas）和界面交互
+- **渲染服务** 驱动无头 Chromium，导航到 `/render`，注入参数，等待 `window.__renderReady`，截图返回
+- **`render/` 目录**是两者的共享契约：同一套组件既在浏览器中渲染，也被 Playwright 捕获
 
-1. **构建生产版本**
+## 技术栈
+
+| 层 | 技术 |
+|----|------|
+| 前端框架 | React 19 + Vite 7 |
+| Markdown 渲染 | react-markdown + remark-gfm + rehype-raw |
+| 代码高亮 | react-syntax-highlighter (Prism) |
+| 浏览器导出 | html2canvas |
+| 国际化 | i18next + react-i18next |
+| 渲染服务 | Express + Playwright |
+| 请求队列 | p-queue |
+| 参数校验 | Ajv |
+| 日志 | pino |
+| 容器 | Docker + nginx |
+
+## 画布尺寸参考
+
+| 平台 | 尺寸 | 比例 |
+|------|------|------|
+| 微信朋友圈 | 1080 × 1260 | 6:7 |
+| 微博竖图 | 1080 × 1920 | 9:16 |
+| Instagram 方图 | 1080 × 1080 | 1:1 |
+| Instagram 竖图 | 1080 × 1350 | 4:5 |
+| 小红书 | 1080 × 1440 | 3:4 |
+
+## 环境变量（渲染服务）
+
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| `PORT` | `3000` | 监听端口 |
+| `FRONTEND_URL` | `http://localhost:5173` | 前端 /render 页面地址 |
+| `MAX_CONCURRENCY` | `2` | 最大并发渲染数 |
+| `BROWSER_MAX_USES` | `500` | 渲染 N 次后重启浏览器 |
+| `BROWSER_MAX_AGE_MS` | `3600000` | 运行 1 小时后重启浏览器 |
+| `REQUEST_TIMEOUT_MS` | `30000` | 单次渲染超时（ms） |
+
+## 运行测试
 
 ```bash
-cd frontend
-npm run build
+# 启动完整栈
+docker compose up --build -d
+
+# 首次生成基准截图
+cd renderer && npm install
+UPDATE_SNAPSHOTS=1 RENDERER_URL=http://127.0.0.1:8080 npm test
+git add test/snapshots/*.png && git commit -m "test: add snapshot baselines"
+
+# 后续回归测试
+RENDERER_URL=http://127.0.0.1:8080 npm test
 ```
 
-2. **部署 dist 目录** 到托管平台。
+## 部署
 
-## ⚠️ 注意事项
+静态部署（仅浏览器导出，无 API）：
 
-1. **内容限制**: 建议内容控制在 10000 字符以内
-2. **浏览器支持**: 建议使用现代浏览器以获得最佳的图片生成效果
-3. **本地存储**: 配置信息目前保存在内存中，刷新页面会重置
+```bash
+cd frontend && npm run build
+# 将 dist/ 部署到 Vercel / Netlify / GitHub Pages
+```
 
-## 🗺 开发路线图
+完整部署（含 API）：
 
-### 已完成 ✅
-- [x] MVP 核心功能
-- [x] 8 个预设主题
-- [x] 渐变背景支持
-- [x] 水印功能
-- [x] 代码高亮支持
-- [x] GFM 表格支持
-- [x] 复制到剪贴板功能
-- [x] 高清图片生成 (2x DPI)
+```bash
+docker compose up --build -d
+# 默认只监听 127.0.0.1:8080
+# 如需公网访问，修改 docker-compose.yml 中的 ports 并在前面加反代 + 认证
+```
 
-### 计划中 🎯
-- [ ] 更多预设主题 (20+)
-- [ ] 历史记录 (本地存储)
-- [ ] 配置模板保存
-- [ ] 批量生成图片
-- [ ] 数学公式支持 (LaTeX)
-- [ ] Mermaid 图表支持
-- [ ] 用户系统与云端同步
+## 许可证
 
-## 📄 许可证
-
-MIT License
-
-## 👥 贡献
-
-欢迎提交 Issue 和 Pull Request!
-
-## 📧 联系方式
-
-如有问题或建议,请通过以下方式联系:
-
-- 提交 Issue: [GitHub Issues](https://github.com/slsefe/markdown-to-image-generator/issues)
-- 邮箱: baiyslsefe@gmail.com
-
----
-
-**Made with ❤️ by Your Name**
+MIT
