@@ -1,0 +1,4 @@
+# Ignore generated snapshots locally — baselines are committed intentionally.
+# To commit a baseline: git add -f renderer/test/snapshots/plain.png
+*.actual.png
+*.diff.png

@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Frontend build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+
+  snapshot-tests:
+    name: Renderer snapshot tests
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start stack
+        run: docker compose up --build -d
+        timeout-minutes: 10
+
+      - name: Wait for health
+        run: |
+          for i in $(seq 1 30); do
+            status=$(curl -sf http://127.0.0.1:8080/api/health | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('browser',''))" 2>/dev/null || echo "")
+            [ "$status" = "connected" ] && echo "Ready" && exit 0
+            echo "Waiting... ($i)"
+            sleep 5
+          done
+          echo "Timed out waiting for stack"
+          docker compose logs
+          exit 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install renderer dev deps
+        run: npm install
+        working-directory: renderer
+
+      - name: Run snapshot tests
+        run: npm test
+        working-directory: renderer
+        env:
+          RENDERER_URL: http://127.0.0.1:8080
+
+      - name: Upload diff artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshot-diffs
+          path: renderer/test/snapshots/*.diff.png
+
+      - name: Stop stack
+        if: always()
+        run: docker compose down
