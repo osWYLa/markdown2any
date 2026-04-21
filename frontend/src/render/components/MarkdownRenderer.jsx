@@ -41,16 +41,23 @@ export default function MarkdownRenderer({ markdown, config }) {
         td: ({...props}) => <td style={{borderColor: config.accent_color}} {...props} />,
         code: ({ className, children, ...props }) => {
           const match = /language-(\w+)/.exec(className || '');
-          return match ? (
-            <SyntaxHighlighter
-              style={isDark ? vscDarkPlus : vs}
-              language={match[1]}
-              PreTag="div"
-              {...props}
-            >
-              {String(children).replace(/\n$/, '')}
-            </SyntaxHighlighter>
-          ) : (
+          const childStr = String(children);
+          // react-markdown v10 dropped the `inline` prop; detect block code by
+          // language class OR multi-line content (fenced block without language)
+          const isBlock = match || childStr.includes('\n');
+          if (isBlock) {
+            return (
+              <SyntaxHighlighter
+                style={isDark ? vscDarkPlus : vs}
+                language={match ? match[1] : 'text'}
+                PreTag="div"
+                {...props}
+              >
+                {childStr.replace(/\n$/, '')}
+              </SyntaxHighlighter>
+            );
+          }
+          return (
             <code
               style={{
                 backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)',

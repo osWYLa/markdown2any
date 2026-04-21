@@ -25,5 +25,9 @@ export const DEFAULT_CONFIG = {
   watermark_angle: -30,
   watermark_color: '#888888',
   watermark_enable: false,
-  watermark_gap: 120
+  watermark_gap: 120,
+  auto_height: true,
+  export_format: 'png',
+  export_scale: 2,
+  export_quality: 0.92,
 };

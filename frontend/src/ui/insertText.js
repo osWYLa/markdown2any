@@ -1,3 +1,15 @@
+// Insert text into a controlled textarea while preserving the browser undo stack.
+// Uses execCommand('insertText') which fires a native input event React picks up.
+// Falls back to setRangeText + dispatched Event when execCommand is unavailable.
+function insertAtCursor(textarea, text, selStart, selEnd) {
+  textarea.focus();
+  textarea.setSelectionRange(selStart, selEnd);
+  if (!document.execCommand('insertText', false, text)) {
+    textarea.setRangeText(text, selStart, selEnd, 'end');
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+}
+
 export function handleEditorAction(type, markdownContent, setMarkdownContent, editorRef, t) {
   const textarea = editorRef.current;
   if (!textarea) return;
@@ -5,8 +17,6 @@ export function handleEditorAction(type, markdownContent, setMarkdownContent, ed
   const start = textarea.selectionStart;
   const end = textarea.selectionEnd;
   const selection = markdownContent.substring(start, end);
-  const before = markdownContent.substring(0, start);
-  const after = markdownContent.substring(end);
 
   let newText = '';
   let selectionOffset = 0;
@@ -92,10 +102,9 @@ export function handleEditorAction(type, markdownContent, setMarkdownContent, ed
       return;
   }
 
-  setMarkdownContent(before + newText + after);
+  insertAtCursor(textarea, newText, start, end);
 
   setTimeout(() => {
-    textarea.focus();
     textarea.setSelectionRange(start + selectionOffset, start + selectionOffset + selectionLength);
   }, 0);
 }

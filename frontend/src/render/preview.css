@@ -36,7 +36,7 @@
 }
 
 .preview-container p {
-  margin-bottom: 1rem;
+  margin-bottom: var(--paragraph-spacing, 1rem);
 }
 
 .preview-container blockquote {

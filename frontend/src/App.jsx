@@ -26,9 +26,10 @@ function App() {
   const [config, setConfig] = useState(DEFAULT_CONFIG);
   const [selectedTheme, setSelectedTheme] = useState('light');
 
-  const { markdownContent, setMarkdownContent } = usePersistentMarkdown();
+  const { markdownContent, setMarkdownContent, resetToSample } = usePersistentMarkdown();
   const { leftWidth, middleWidth, isResizingLeft, isResizingRight, startResizeLeft, startResizeRight } = useResizablePanels();
-  const { previewRef, loading, copying, error, successMessage, downloadImage, copyImageToClipboard } = useExportImage(markdownContent, config, t);
+  const { previewRef, loading, copying, error, successMessage, isOverflowing, downloadImage, copyImageToClipboard } = useExportImage(markdownContent, config, t);
+  const isOverLimit = markdownContent.length >= 10000;
 
   const applyTheme = (themeId) => {
     const theme = THEMES[themeId];
@@ -76,6 +77,7 @@ function App() {
           markdownContent={markdownContent}
           setMarkdownContent={setMarkdownContent}
           middleWidth={middleWidth}
+          onResetToSample={resetToSample}
         />
         <Resizer onMouseDown={startResizeRight} active={isResizingRight} />
         <div className="panel preview-panel">
@@ -84,6 +86,7 @@ function App() {
             <ExportActions
               loading={loading}
               copying={copying}
+              isOverLimit={isOverLimit}
               onDownload={downloadImage}
               onCopy={copyImageToClipboard}
             />
@@ -91,7 +94,7 @@ function App() {
               <PreviewCanvas ref={previewRef} markdown={markdownContent} config={config} />
             </div>
           </div>
-          <Toasts error={error} successMessage={successMessage} />
+          <Toasts error={error} successMessage={successMessage} isOverflowing={isOverflowing} />
         </div>
       </div>
     </div>

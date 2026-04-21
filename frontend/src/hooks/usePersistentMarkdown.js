@@ -1,13 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
+const STORAGE_KEY = 'md2img-content';
+
 export function usePersistentMarkdown() {
-  const { t, i18n } = useTranslation();
-  const [markdownContent, setMarkdownContent] = useState(t('defaultMarkdown'));
+  const { t } = useTranslation();
 
+  // Initialize once: from localStorage if present, else seed with default sample
+  const [markdownContent, setMarkdownContent] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved !== null ? saved : t('defaultMarkdown');
+  });
+
+  // Persist every change to localStorage
   useEffect(() => {
-    setMarkdownContent(t('defaultMarkdown'));
-  }, [i18n.language, t]);
+    localStorage.setItem(STORAGE_KEY, markdownContent);
+  }, [markdownContent]);
 
-  return { markdownContent, setMarkdownContent };
+  // Explicit reset button — uses current locale's sample
+  const resetToSample = useCallback(() => {
+    const sample = t('defaultMarkdown');
+    setMarkdownContent(sample);
+    localStorage.setItem(STORAGE_KEY, sample);
+  }, [t]);
+
+  return { markdownContent, setMarkdownContent, resetToSample };
 }

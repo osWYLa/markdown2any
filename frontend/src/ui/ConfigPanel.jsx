@@ -5,6 +5,7 @@ import Typography from './config-sections/Typography.jsx';
 import Color from './config-sections/Color.jsx';
 import Meta from './config-sections/Meta.jsx';
 import WatermarkConfig from './config-sections/Watermark.jsx';
+import ExportConfig from './config-sections/Export.jsx';
 
 export default function ConfigPanel({
   config, setConfig, selectedTheme, THEMES, PRESET_SIZES,
@@ -21,6 +22,7 @@ export default function ConfigPanel({
         <Color config={config} setConfig={setConfig} />
         <Meta config={config} setConfig={setConfig} />
         <WatermarkConfig config={config} setConfig={setConfig} />
+        <ExportConfig config={config} setConfig={setConfig} />
         <div className="action-buttons">
           <button className="btn btn-secondary" onClick={onReset}>
             {t('resetConfig')}

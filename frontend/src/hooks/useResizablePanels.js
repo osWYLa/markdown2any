@@ -1,47 +1,64 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-export function useResizablePanels(initialLeft = 500, initialMiddle = 1000) {
+export function useResizablePanels(initialLeft = 320, initialMiddle = 560) {
   const [leftWidth, setLeftWidth] = useState(initialLeft);
   const [middleWidth, setMiddleWidth] = useState(initialMiddle);
   const [isResizingLeft, setIsResizingLeft] = useState(false);
   const [isResizingRight, setIsResizingRight] = useState(false);
 
+  const startXRef = useRef(0);
+  const startWidthRef = useRef(0);
+
+  const startResizeLeft = (e) => {
+    e.preventDefault();
+    startXRef.current = e.clientX;
+    startWidthRef.current = leftWidth;
+    setIsResizingLeft(true);
+  };
+
+  const startResizeRight = (e) => {
+    e.preventDefault();
+    startXRef.current = e.clientX;
+    startWidthRef.current = middleWidth;
+    setIsResizingRight(true);
+  };
+
   useEffect(() => {
-    const handleMouseMove = (e) => {
+    if (!isResizingLeft && !isResizingRight) return;
+
+    const handlePointerMove = (e) => {
+      const delta = e.clientX - startXRef.current;
       if (isResizingLeft) {
-        setLeftWidth(Math.max(250, Math.min(600, e.clientX)));
-      } else if (isResizingRight) {
-        setMiddleWidth(Math.max(300, Math.min(1000, e.clientX - leftWidth)));
+        setLeftWidth(Math.max(250, Math.min(600, startWidthRef.current + delta)));
+      } else {
+        setMiddleWidth(Math.max(300, Math.min(1000, startWidthRef.current + delta)));
       }
     };
 
-    const handleMouseUp = () => {
+    const handlePointerUp = () => {
       setIsResizingLeft(false);
       setIsResizingRight(false);
       document.body.style.cursor = 'default';
+      document.body.style.userSelect = 'auto';
     };
 
-    if (isResizingLeft || isResizingRight) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
-    } else {
-      document.body.style.userSelect = 'auto';
-    }
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
     };
-  }, [isResizingLeft, isResizingRight, leftWidth]);
+  }, [isResizingLeft, isResizingRight]);
 
   return {
     leftWidth,
     middleWidth,
     isResizingLeft,
     isResizingRight,
-    startResizeLeft: () => setIsResizingLeft(true),
-    startResizeRight: () => setIsResizingRight(true),
+    startResizeLeft,
+    startResizeRight,
   };
 }

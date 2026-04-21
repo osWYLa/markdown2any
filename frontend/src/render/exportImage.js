@@ -1,10 +1,10 @@
 import html2canvas from 'html2canvas';
 
+const MIME = { png: 'image/png', jpeg: 'image/jpeg', webp: 'image/webp' };
+
 /**
  * Generates a canvas from a container DOM element.
- * @param {HTMLElement} containerEl - the DOM element to capture (previewRef.current)
- * @param {{ onError?: (msg: string) => void, config?: object }} [options]
- * @returns {Promise<HTMLCanvasElement | null>}
+ * When config.auto_height is true, uses scrollHeight to avoid silent content crop (bug #6).
  */
 export async function generateCanvas(containerEl, { onError, config } = {}) {
   if (!containerEl) {
@@ -12,24 +12,34 @@ export async function generateCanvas(containerEl, { onError, config } = {}) {
     return null;
   }
 
+  const format = config?.export_format || 'png';
+  const scale = config?.export_scale || 2;
+  const width = config ? config.canvas_width : containerEl.offsetWidth;
+  const naturalHeight = config ? config.canvas_height : containerEl.offsetHeight;
+  // Bug #6: use scrollHeight when auto_height is enabled so content is never silently cropped
+  const height = (config?.auto_height && containerEl.scrollHeight > naturalHeight)
+    ? containerEl.scrollHeight
+    : naturalHeight;
+
   const canvas = await html2canvas(containerEl, {
-    scale: 2,
+    scale,
     backgroundColor: null,
-    width: config ? config.canvas_width : containerEl.offsetWidth,
-    height: config ? config.canvas_height : containerEl.offsetHeight,
-    windowWidth: config ? config.canvas_width : containerEl.offsetWidth,
-    windowHeight: config ? config.canvas_height : containerEl.offsetHeight,
+    width,
+    height,
+    windowWidth: width,
+    windowHeight: height,
     logging: false,
+    // Bug #13: enable CORS + allowTaint so cross-origin images don't taint the canvas
     useCORS: true,
+    allowTaint: true,
+    imageTimeout: 8000,
   });
 
   return canvas;
 }
 
 /**
- * Downloads the preview as a PNG image.
- * @param {HTMLElement} containerEl
- * @param {{ onLoading?: (v: boolean) => void, onError?: (msg: string) => void, onSuccess?: (msg: string) => void, config?: object }} [options]
+ * Downloads the preview as an image (format from config.export_format).
  */
 export async function downloadImage(containerEl, { onLoading, onError, onSuccess, config } = {}) {
   onLoading && onLoading(true);
@@ -38,15 +48,16 @@ export async function downloadImage(containerEl, { onLoading, onError, onSuccess
 
   try {
     const canvas = await generateCanvas(containerEl, { onError, config });
-    if (!canvas) {
-      onLoading && onLoading(false);
-      return;
-    }
+    if (!canvas) { onLoading && onLoading(false); return; }
 
-    const imageData = canvas.toDataURL('image/png', 1.0);
+    const format = config?.export_format || 'png';
+    const quality = config?.export_quality ?? 0.92;
+    const mime = MIME[format] || 'image/png';
+    const imageData = canvas.toDataURL(mime, quality);
+
     const link = document.createElement('a');
     link.href = imageData;
-    link.download = `markdown-image-${Date.now()}.png`;
+    link.download = `markdown-image-${Date.now()}.${format}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -60,8 +71,7 @@ export async function downloadImage(containerEl, { onLoading, onError, onSuccess
 
 /**
  * Copies the preview as a PNG image to the clipboard.
- * @param {HTMLElement} containerEl
- * @param {{ onCopying?: (v: boolean) => void, onError?: (msg: string) => void, onSuccess?: (msg: string) => void, config?: object, successMessage?: string, failMessage?: string }} [options]
+ * Bug #7: ClipboardItem is constructed synchronously (required by Safari) with a Promise value.
  */
 export async function copyImageToClipboard(
   containerEl,
@@ -72,31 +82,22 @@ export async function copyImageToClipboard(
   onSuccess && onSuccess(null);
 
   try {
-    const canvas = await generateCanvas(containerEl, { onError, config });
-    if (!canvas) {
-      onCopying && onCopying(false);
-      return;
-    }
+    // Construct ClipboardItem synchronously — Safari rejects async construction
+    const blobPromise = generateCanvas(containerEl, { config }).then(
+      (canvas) => new Promise((resolve, reject) => {
+        if (!canvas) { reject(new Error('canvas generation failed')); return; }
+        canvas.toBlob((b) => b ? resolve(b) : reject(new Error('toBlob failed')), 'image/png');
+      })
+    );
 
-    canvas.toBlob(async (blob) => {
-      try {
-        await navigator.clipboard.write([
-          new ClipboardItem({ 'image/png': blob })
-        ]);
-
-        onSuccess && onSuccess(successMessage);
-        // Clear success message after 3 seconds
-        setTimeout(() => onSuccess && onSuccess(null), 3000);
-      } catch (err) {
-        console.error('Error copying to clipboard:', err);
-        onError && onError(failMessage);
-      } finally {
-        onCopying && onCopying(false);
-      }
-    }, 'image/png');
+    const item = new ClipboardItem({ 'image/png': blobPromise });
+    await navigator.clipboard.write([item]);
+    onSuccess && onSuccess(successMessage);
+    setTimeout(() => onSuccess && onSuccess(null), 3000);
   } catch (err) {
-    onError && onError(err.message || failMessage);
-    console.error('Error generating image for copy:', err);
+    console.error('Error copying to clipboard:', err);
+    onError && onError(failMessage);
+  } finally {
     onCopying && onCopying(false);
   }
 }

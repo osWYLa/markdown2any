@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { validateMarkdown } from '../render/validators.js';
 import {
   downloadImage as exportDownloadImage,
@@ -11,6 +11,14 @@ export function useExportImage(markdownContent, config, t) {
   const [copying, setCopying] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+
+  // Bug #6: detect live content overflow so user can see it before export
+  useEffect(() => {
+    const el = previewRef.current;
+    if (!el) return;
+    setIsOverflowing(!config.auto_height && el.scrollHeight > config.canvas_height);
+  });
 
   const downloadImage = async () => {
     const { ok, errors } = validateMarkdown(markdownContent, 10000);
@@ -36,5 +44,5 @@ export function useExportImage(markdownContent, config, t) {
     });
   };
 
-  return { previewRef, loading, copying, error, successMessage, downloadImage, copyImageToClipboard };
+  return { previewRef, loading, copying, error, successMessage, isOverflowing, downloadImage, copyImageToClipboard };
 }
