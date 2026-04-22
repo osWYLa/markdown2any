@@ -38,7 +38,11 @@ export default function MarkdownRenderer({ markdown, config }) {
         del: ({...props}) => <del style={{color: config.accent_color}} {...props} />,
         u: ({...props}) => <u style={{color: config.accent_color}} {...props} />,
         a: ({...props}) => <a style={{color: config.accent_color}} {...props} />,
-        table: ({...props}) => <table style={{borderColor: config.accent_color}} {...props} />,
+        table: ({...props}) => (
+          <div style={{ overflowX: 'auto', width: '100%', WebkitOverflowScrolling: 'touch' }}>
+            <table style={{borderColor: config.accent_color}} {...props} />
+          </div>
+        ),
         th: ({...props}) => <th style={{backgroundColor: config.accent_color, color: config.background_color}} {...props} />,
         td: ({...props}) => <td style={{borderColor: config.accent_color}} {...props} />,
         code: ({ className, children, ...props }) => {
