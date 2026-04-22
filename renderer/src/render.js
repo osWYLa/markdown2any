@@ -63,16 +63,20 @@ export async function renderToBuffer(payload) {
     await page.waitForFunction(() => window.__renderReady === true, { timeout: 10000 });
     await page.evaluate(() => document.fonts.ready);
 
-    // Bug #6: auto_height — grow viewport to content if needed
+    // auto_height: measure actual content height by temporarily clearing minHeight
     let captureHeight = height;
     if (merged.auto_height) {
-      const scrollHeight = await page.evaluate(() =>
-        document.getElementById('render-root')?.scrollHeight ?? 0
-      );
-      if (scrollHeight > height) {
-        captureHeight = scrollHeight;
-        await page.setViewportSize({ width, height: captureHeight });
-      }
+      const contentHeight = await page.evaluate(() => {
+        const el = document.getElementById('render-root');
+        if (!el) return 0;
+        const prev = el.style.minHeight;
+        el.style.minHeight = '0px';
+        const h = el.scrollHeight;
+        el.style.minHeight = prev;
+        return h;
+      });
+      captureHeight = Math.max(contentHeight, 1);
+      await page.setViewportSize({ width, height: captureHeight });
     }
 
     // Clip to just the render-root element
@@ -105,11 +109,19 @@ export async function renderToBuffer(payload) {
       await scaledPage.waitForFunction(() => window.__renderReady === true, { timeout: 10000 });
       await scaledPage.evaluate(() => document.fonts.ready);
 
-      const clip = await scaledPage.evaluate((w) => {
+      const clip = await scaledPage.evaluate(({ w, isAutoHeight }) => {
         const el = document.getElementById('render-root');
-        const r = el?.getBoundingClientRect();
-        return r ? { x: 0, y: 0, width: w, height: r.height } : null;
-      }, width);
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        let h = r.height;
+        if (isAutoHeight) {
+          const prev = el.style.minHeight;
+          el.style.minHeight = '0px';
+          h = el.scrollHeight;
+          el.style.minHeight = prev;
+        }
+        return { x: r.x, y: r.y, width: w, height: h };
+      }, { w: width, isAutoHeight: merged.auto_height });
 
       const buffer = await scaledPage.screenshot({
         type: screenshotOptions.type,
