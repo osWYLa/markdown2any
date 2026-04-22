@@ -47,3 +47,10 @@ temp/
 
 # Git worktrees
 .worktrees/
+
+# Playwright MCP session artifacts
+.playwright-mcp/
+
+# Ad-hoc screenshots at repo root
+/image.png
+/ui-check.png
