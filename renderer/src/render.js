@@ -16,6 +16,7 @@ const DEFAULT_CONFIG = {
 };
 
 const THEMES = {
+  plain:   { background_color: '#FFFFFF', text_color: '#1F1F1F', accent_color: '#1F1F1F' },
   light:   { background_color: '#FFFFFF', text_color: '#333333', accent_color: '#007AFF' },
   dark:    { background_color: '#1a1a1a', text_color: '#E5E5E5', accent_color: '#4A9EFF' },
   warm:    { background_color: '#FFF8F0', text_color: '#5D4E37', accent_color: '#D2691E' },
@@ -52,49 +53,6 @@ export async function renderToBuffer(payload) {
 
   const page = await acquirePage();
   try {
-    await page.addInitScript((p) => { window.__RENDER_PAYLOAD__ = p; }, {
-      markdown: payload.markdown,
-      theme: payload.theme,
-      config: merged,
-    });
-
-    await page.setViewportSize({ width, height });
-    await page.goto(`${FRONTEND_URL}/render`, { waitUntil: 'networkidle', timeout: 15000 });
-    await page.waitForFunction(() => window.__renderReady === true, { timeout: 10000 });
-    await page.evaluate(() => document.fonts.ready);
-
-    // auto_height: measure actual content height by temporarily clearing minHeight
-    let captureHeight = height;
-    if (merged.auto_height) {
-      const contentHeight = await page.evaluate(() => {
-        const el = document.getElementById('render-root');
-        if (!el) return 0;
-        const prev = el.style.minHeight;
-        el.style.minHeight = '0px';
-        const h = el.scrollHeight;
-        el.style.minHeight = prev;
-        return h;
-      });
-      captureHeight = Math.max(contentHeight, 1);
-      await page.setViewportSize({ width, height: captureHeight });
-    }
-
-    // Clip to just the render-root element
-    const box = await page.evaluate(() => {
-      const el = document.getElementById('render-root');
-      const r = el?.getBoundingClientRect();
-      return r ? { x: r.x, y: r.y, width: r.width, height: r.height } : null;
-    });
-
-    const ctx = await page.context().newPage();
-    await ctx.close(); // not used — placeholder; scale is set on context level
-
-    const screenshotOptions = {
-      type: format === 'png' ? 'png' : format === 'webp' ? 'webp' : 'jpeg',
-      ...(format !== 'png' ? { quality: Math.round(quality * 100) } : {}),
-      ...(box ? { clip: { ...box, width: box.width * scale, height: box.height * scale } } : {}),
-    };
-
     // Use deviceScaleFactor via a fresh context for correct scale
     const scaledCtx = await page.context().browser().newContext({ deviceScaleFactor: scale });
     const scaledPage = await scaledCtx.newPage();
@@ -104,28 +62,33 @@ export async function renderToBuffer(payload) {
         theme: payload.theme,
         config: merged,
       });
-      await scaledPage.setViewportSize({ width, height: captureHeight });
+      // Initial viewport — will be resized after measuring content height
+      await scaledPage.setViewportSize({ width, height });
       await scaledPage.goto(`${FRONTEND_URL}/render`, { waitUntil: 'networkidle', timeout: 15000 });
       await scaledPage.waitForFunction(() => window.__renderReady === true, { timeout: 10000 });
       await scaledPage.evaluate(() => document.fonts.ready);
 
-      const clip = await scaledPage.evaluate(({ w, isAutoHeight }) => {
+      // Measure real content height by clearing min-height before reading scrollHeight,
+      // then leave it cleared so the element shrinks to content for the screenshot.
+      const clip = await scaledPage.evaluate(({ w, h, isAutoHeight }) => {
         const el = document.getElementById('render-root');
         if (!el) return null;
-        const r = el.getBoundingClientRect();
-        let h = r.height;
+        let captureH = h;
         if (isAutoHeight) {
-          const prev = el.style.minHeight;
           el.style.minHeight = '0px';
-          h = el.scrollHeight;
-          el.style.minHeight = prev;
+          captureH = Math.max(el.scrollHeight, 1);
         }
-        return { x: r.x, y: r.y, width: w, height: h };
-      }, { w: width, isAutoHeight: merged.auto_height });
+        return { x: 0, y: 0, width: w, height: captureH };
+      }, { w: width, h: height, isAutoHeight: merged.auto_height });
+
+      // Resize viewport to match actual content so Playwright doesn't pad
+      if (clip) {
+        await scaledPage.setViewportSize({ width, height: clip.height });
+      }
 
       const buffer = await scaledPage.screenshot({
-        type: screenshotOptions.type,
-        ...(format !== 'png' ? { quality: screenshotOptions.quality } : {}),
+        type: format === 'png' ? 'png' : format === 'webp' ? 'webp' : 'jpeg',
+        ...(format !== 'png' ? { quality: Math.round(quality * 100) } : {}),
         ...(clip ? { clip } : {}),
       });
       return buffer;

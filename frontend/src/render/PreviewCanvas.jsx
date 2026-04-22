@@ -34,11 +34,15 @@ const PreviewCanvas = React.forwardRef(function PreviewCanvas(
         minHeight: `${config.canvas_height}px`,
         boxSizing: 'border-box',
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column'
       }}
     >
       <MetaInfo config={config} position="top" />
-      <MarkdownRenderer markdown={markdown} config={config} />
+      <div style={{ flex: '1 0 auto' }}>
+        <MarkdownRenderer markdown={markdown} config={config} />
+      </div>
       <MetaInfo config={config} position="bottom" />
       <Watermark config={config} />
     </div>

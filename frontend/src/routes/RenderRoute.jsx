@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { DEFAULT_CONFIG } from '../render/defaultConfig.js';
 import { getThemes } from '../render/themes.js';
+import { normalizeMarkdown } from '../render/normalizeMarkdown.js';
 import PreviewCanvas from '../render/PreviewCanvas.jsx';
 import '../render/preview.css';
 
@@ -24,7 +25,7 @@ export default function RenderRoute() {
     config = { ...config, ...raw.config };
   }
 
-  const markdown = raw?.markdown ?? '# Hello\n\nNo payload provided.';
+  const markdown = normalizeMarkdown(raw?.markdown ?? '# Hello\n\nNo payload provided.');
 
   // Signal to Playwright that the component has mounted and fonts are ready.
   // Double rAF after fonts.ready lets ResizeObserver callbacks (e.g. watermark

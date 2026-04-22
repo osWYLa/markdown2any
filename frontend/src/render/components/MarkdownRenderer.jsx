@@ -4,6 +4,7 @@ import rehypeRaw from 'rehype-raw';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { isDarkBackground } from '../colorUtils.js';
+import { normalizeMarkdown } from '../normalizeMarkdown.js';
 
 /**
  * Pure markdown renderer component.
@@ -12,6 +13,7 @@ import { isDarkBackground } from '../colorUtils.js';
  */
 export default function MarkdownRenderer({ markdown, config }) {
   const isDark = isDarkBackground(config);
+  const md = normalizeMarkdown(markdown);
 
   return (
     <ReactMarkdown
@@ -75,7 +77,7 @@ export default function MarkdownRenderer({ markdown, config }) {
         },
       }}
     >
-      {markdown}
+      {md}
     </ReactMarkdown>
   );
 }

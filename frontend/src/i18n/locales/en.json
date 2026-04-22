@@ -52,6 +52,7 @@
   "errorPreviewNotReady": "Preview container is not ready",
   "errorUnknown": "An unknown error occurred while generating the image",
   "themes": {
+    "plain": "Plain",
     "light": "Light & Simple",
     "dark": "Dark & Elegant",
     "warm": "Warm & Cozy",

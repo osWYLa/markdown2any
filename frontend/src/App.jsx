@@ -24,7 +24,7 @@ function App() {
   const PRESET_SIZES = getPresetSizes(t);
 
   const [config, setConfig] = useState(DEFAULT_CONFIG);
-  const [selectedTheme, setSelectedTheme] = useState('light');
+  const [selectedTheme, setSelectedTheme] = useState('plain');
 
   const { markdownContent, setMarkdownContent, resetToSample } = usePersistentMarkdown();
   const { leftWidth, middleWidth, isResizingLeft, isResizingRight, startResizeLeft, startResizeRight } = useResizablePanels();
@@ -45,7 +45,7 @@ function App() {
 
   const resetConfig = () => {
     setConfig(DEFAULT_CONFIG);
-    setSelectedTheme('light');
+    setSelectedTheme('plain');
   };
 
   return (
@@ -88,6 +88,7 @@ function App() {
               copying={copying}
               curlCopying={curlCopying}
               isOverLimit={isOverLimit}
+              isOverflowing={isOverflowing}
               onDownload={downloadImage}
               onCopy={copyImageToClipboard}
               onCopyCurl={copyCurlCommand}
@@ -96,9 +97,9 @@ function App() {
               <PreviewCanvas ref={previewRef} markdown={markdownContent} config={config} />
             </div>
           </div>
-          <Toasts error={error} successMessage={successMessage} isOverflowing={isOverflowing} />
         </div>
       </div>
+      <Toasts error={error} successMessage={successMessage} />
     </div>
   );
 }

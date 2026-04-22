@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { validateMarkdown } from '../render/validators.js';
 import {
   downloadImage as exportDownloadImage,
@@ -14,6 +14,15 @@ export function useExportImage(markdownContent, config, t, selectedTheme) {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
+  const errorTimerRef = useRef(null);
+
+  const setErrorAutoClear = useCallback((msg) => {
+    setError(msg);
+    if (msg) {
+      clearTimeout(errorTimerRef.current);
+      errorTimerRef.current = setTimeout(() => setError(null), 4000);
+    }
+  }, []);
 
   // Bug #6: detect live content overflow so user can see it before export
   useEffect(() => {
@@ -24,10 +33,10 @@ export function useExportImage(markdownContent, config, t, selectedTheme) {
 
   const downloadImage = async () => {
     const { ok, errors } = validateMarkdown(markdownContent, 10000);
-    if (!ok) { setError(t(errors[0])); return; }
+    if (!ok) { setErrorAutoClear(t(errors[0])); return; }
     await exportDownloadImage(previewRef.current, {
       onLoading: setLoading,
-      onError: setError,
+      onError: setErrorAutoClear,
       onSuccess: setSuccessMessage,
       config,
     });
@@ -35,10 +44,10 @@ export function useExportImage(markdownContent, config, t, selectedTheme) {
 
   const copyImageToClipboard = async () => {
     const { ok, errors } = validateMarkdown(markdownContent, 10000);
-    if (!ok) { setError(t(errors[0])); return; }
+    if (!ok) { setErrorAutoClear(t(errors[0])); return; }
     await exportCopyImage(previewRef.current, {
       onCopying: setCopying,
-      onError: setError,
+      onError: setErrorAutoClear,
       onSuccess: setSuccessMessage,
       config,
       successMessage: t('copySuccess'),
@@ -48,18 +57,19 @@ export function useExportImage(markdownContent, config, t, selectedTheme) {
 
   const copyCurlCommand = async () => {
     const { ok, errors } = validateMarkdown(markdownContent, 10000);
-    if (!ok) { setError(t(errors[0])); return; }
+    if (!ok) { setErrorAutoClear(t(errors[0])); return; }
     setCurlCopying(true);
     try {
       const cmd = buildCurlCommand(markdownContent, config, selectedTheme);
       await navigator.clipboard.writeText(cmd);
       setSuccessMessage(t('curlCopySuccess'));
+      setTimeout(() => setSuccessMessage(null), 3000);
     } catch {
-      setError(t('curlCopyFailed'));
+      setErrorAutoClear(t('curlCopyFailed'));
     } finally {
       setCurlCopying(false);
     }
   };
 
-  return { previewRef, loading, copying, curlCopying, error, successMessage, isOverflowing, downloadImage, copyImageToClipboard, copyCurlCommand };
+  return { previewRef, loading, copying, curlCopying, error, successMessage, isOverflowing, downloadImage, copyImageToClipboard, copyCurlCommand, setError: setErrorAutoClear };
 }

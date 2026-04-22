@@ -4,6 +4,16 @@
 // No imports from ui/, hooks/, or i18n/ modules.
 
 export const getThemes = (t) => ({
+  plain: {
+    id: 'plain',
+    name: t('themes.plain'),
+    config: {
+      background_color: '#FFFFFF',
+      text_color: '#1F1F1F',
+      accent_color: '#1F1F1F',
+      font_family: 'PingFang SC, -apple-system, sans-serif',
+    }
+  },
   light: {
     id: 'light',
     name: t('themes.light'),

@@ -10,7 +10,7 @@ export const DEFAULT_CONFIG = {
   gradient_end: '#764ba2',
   gradient_angle: 135,
   text_color: '#333333',
-  accent_color: '#007AFF',
+  accent_color: '#1F1F1F',
   font_family: 'PingFang SC, -apple-system, sans-serif',
   font_size: 16,
   padding: 40,

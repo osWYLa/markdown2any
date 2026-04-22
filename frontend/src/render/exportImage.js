@@ -16,10 +16,15 @@ export async function generateCanvas(containerEl, { onError, config } = {}) {
   const scale = config?.export_scale || 2;
   const width = config ? config.canvas_width : containerEl.offsetWidth;
   const naturalHeight = config ? config.canvas_height : containerEl.offsetHeight;
-  // Bug #6: use scrollHeight when auto_height is enabled so content is never silently cropped
-  const height = (config?.auto_height && containerEl.scrollHeight > naturalHeight)
-    ? containerEl.scrollHeight
-    : naturalHeight;
+
+  // Temporarily clear min-height so scrollHeight reflects real content height.
+  // html2canvas clones the DOM and reads inline styles, so the clone also gets
+  // the cleared min-height — this prevents blank space at the bottom when
+  // auto_height is true and content is shorter than canvas_height.
+  const prevMinHeight = containerEl.style.minHeight;
+  if (config?.auto_height) containerEl.style.minHeight = '0px';
+  const contentHeight = containerEl.scrollHeight;
+  const height = config?.auto_height ? contentHeight : naturalHeight;
 
   const canvas = await html2canvas(containerEl, {
     scale,
@@ -34,6 +39,9 @@ export async function generateCanvas(containerEl, { onError, config } = {}) {
     allowTaint: true,
     imageTimeout: 8000,
   });
+
+  // Restore min-height after html2canvas has cloned the DOM
+  containerEl.style.minHeight = prevMinHeight;
 
   return canvas;
 }

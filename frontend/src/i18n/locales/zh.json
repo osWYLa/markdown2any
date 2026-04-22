@@ -52,6 +52,7 @@
   "errorPreviewNotReady": "预览容器未就绪",
   "errorUnknown": "生成图片时发生未知错误",
   "themes": {
+    "plain": "简约朴素",
     "light": "简约明亮",
     "dark": "深色优雅",
     "warm": "温暖舒适",
