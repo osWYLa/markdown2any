@@ -26,10 +26,14 @@ export default function RenderRoute() {
 
   const markdown = raw?.markdown ?? '# Hello\n\nNo payload provided.';
 
-  // Signal to Playwright that the component has mounted and fonts are ready
+  // Signal to Playwright that the component has mounted and fonts are ready.
+  // Double rAF after fonts.ready lets ResizeObserver callbacks (e.g. watermark
+  // re-measure after font-driven reflow) settle before the screenshot is taken.
   useEffect(() => {
     document.fonts.ready.then(() => {
-      window.__renderReady = true;
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        window.__renderReady = true;
+      }));
     });
   }, []);
 
