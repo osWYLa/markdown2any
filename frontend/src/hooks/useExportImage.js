@@ -4,11 +4,13 @@ import {
   downloadImage as exportDownloadImage,
   copyImageToClipboard as exportCopyImage,
 } from '../render/exportImage.js';
+import { buildCurlCommand } from '../render/buildCurlCommand.js';
 
-export function useExportImage(markdownContent, config, t) {
+export function useExportImage(markdownContent, config, t, selectedTheme) {
   const previewRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [copying, setCopying] = useState(false);
+  const [curlCopying, setCurlCopying] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
@@ -44,5 +46,20 @@ export function useExportImage(markdownContent, config, t) {
     });
   };
 
-  return { previewRef, loading, copying, error, successMessage, isOverflowing, downloadImage, copyImageToClipboard };
+  const copyCurlCommand = async () => {
+    const { ok, errors } = validateMarkdown(markdownContent, 10000);
+    if (!ok) { setError(t(errors[0])); return; }
+    setCurlCopying(true);
+    try {
+      const cmd = buildCurlCommand(markdownContent, config, selectedTheme);
+      await navigator.clipboard.writeText(cmd);
+      setSuccessMessage(t('curlCopySuccess'));
+    } catch {
+      setError(t('curlCopyFailed'));
+    } finally {
+      setCurlCopying(false);
+    }
+  };
+
+  return { previewRef, loading, copying, curlCopying, error, successMessage, isOverflowing, downloadImage, copyImageToClipboard, copyCurlCommand };
 }

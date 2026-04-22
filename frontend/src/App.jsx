@@ -28,7 +28,7 @@ function App() {
 
   const { markdownContent, setMarkdownContent, resetToSample } = usePersistentMarkdown();
   const { leftWidth, middleWidth, isResizingLeft, isResizingRight, startResizeLeft, startResizeRight } = useResizablePanels();
-  const { previewRef, loading, copying, error, successMessage, isOverflowing, downloadImage, copyImageToClipboard } = useExportImage(markdownContent, config, t);
+  const { previewRef, loading, copying, curlCopying, error, successMessage, isOverflowing, downloadImage, copyImageToClipboard, copyCurlCommand } = useExportImage(markdownContent, config, t, selectedTheme);
   const isOverLimit = markdownContent.length >= 10000;
 
   const applyTheme = (themeId) => {
@@ -86,9 +86,11 @@ function App() {
             <ExportActions
               loading={loading}
               copying={copying}
+              curlCopying={curlCopying}
               isOverLimit={isOverLimit}
               onDownload={downloadImage}
               onCopy={copyImageToClipboard}
+              onCopyCurl={copyCurlCommand}
             />
             <div className="preview-scroll-container">
               <PreviewCanvas ref={previewRef} markdown={markdownContent} config={config} />
