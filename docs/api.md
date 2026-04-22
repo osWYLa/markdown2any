@@ -20,7 +20,7 @@ Convert Markdown to an image and return it as binary.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `markdown` | string (≤10000 chars) | ✅ | Markdown source |
-| `theme` | string | — | Preset theme name: `light` `dark` `warm` `forest` `ocean` `vintage` `midnight` `sakura` |
+| `theme` | string | — | Preset theme name: `plain` `light` `dark` `warm` `forest` `ocean` `vintage` `midnight` `sakura` |
 | `config` | object | — | Partial `RenderConfig` — overrides theme defaults (see fields below) |
 | `format` | `png` \| `jpeg` \| `webp` | — | Output format (default: `png`) |
 | `scale` | `1` \| `2` \| `3` | — | Device pixel ratio (default: `2`) |
@@ -54,7 +54,10 @@ Convert Markdown to an image and return it as binary.
   "watermark_angle":   -30,
   "watermark_color":   "#888888",
   "watermark_gap":     120,
-  "auto_height":       true
+  "auto_height":       true,
+  "export_format":     "png",
+  "export_scale":      2,
+  "export_quality":    0.92
 }
 ```
 
